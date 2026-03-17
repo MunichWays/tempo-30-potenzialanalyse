@@ -2,7 +2,7 @@ from typing import List
 from dataclasses import dataclass
 import geopandas as gpd
 
-from PotentialCalculationResult import PotentialCalculationResult
+from PotentialCalculation.PotentialCalculationResult import PotentialCalculationResult
 
 class ZebraPotential:
     @staticmethod

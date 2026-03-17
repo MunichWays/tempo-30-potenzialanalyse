@@ -6,7 +6,7 @@ import pandas as pd
 from pyproj import Transformer
 from tqdm import tqdm
 
-from PotentialCalculationResult import PotentialCalculationResult
+from PotentialCalculation.PotentialCalculationResult import PotentialCalculationResult
 
 # create once (cheap but still better than recreating every call)
 _TRANSFORMER_3857_TO_4326 = Transformer.from_crs(

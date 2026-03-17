@@ -1,7 +1,7 @@
 from typing import List
 import geopandas as gpd
 
-from PotentialCalculationResult import PotentialCalculationResult
+from PotentialCalculation.PotentialCalculationResult import PotentialCalculationResult
 
 class EducationBdgPotential:
     @staticmethod

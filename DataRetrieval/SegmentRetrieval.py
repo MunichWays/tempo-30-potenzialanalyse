@@ -16,7 +16,7 @@ class SegmentRetrieval:
 
     def __init__(self, timeout: int = 600):
         self.timeout = timeout
-        self.datacache = OSMDataCache("streets")
+        self.datacache = OSMDataCache(datatype = "streets")
 
     def _build_query(
         self,

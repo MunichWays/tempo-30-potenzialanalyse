@@ -1,22 +1,32 @@
+import matplotlib.pyplot as plt
+
 from DataRetrieval.SegmentRetrieval import SegmentRetrieval
 from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
 from DataRetrieval.EducationalBdgRetrieval import EducationalBuildingRetrieval
 
-import matplotlib.pyplot as plt
+from PotentialCalculation.ZebraPotential import ZebraPotential
+from PotentialCalculation.EducationBdgPotential import EducationBdgPotential
+from PotentialCalculation.GapPotential import Tempo50GapPotential
+from PotentialCalculation.PotentialCalculationResult import PotentialCalculationResult
 
-from StreetPlot import StreetPlot
-from ZebraPotential import ZebraPotential
-from EducationBdgPotential import EducationBdgPotential
-from GapPotential import Tempo50GapPotential
 from SpeedAnnotationUpdater import SpeedAnnotationUpdater
 from BoundingBoxStorage import BoundingBoxStorage
-from geojson_creation import GeoJsonCreator
-from PotentialCalculationResult import PotentialCalculationResult
-from PrintOutput import PrintOutput
 
-used_bbox = BoundingBoxStorage.bbox_isarvorstadt # "München"
+from DataOutput.GeoJsonCreator import GeoJsonCreator
+from DataOutput.PrintOutput import PrintOutput
+from DataOutput.StreetPlot import StreetPlot
+
+area_under_creation = "München"
+
+
+if(area_under_creation != "München"):
+    used_bbox = BoundingBoxStorage.get(area_under_creation)
+else:
+    used_bbox : str = "München" # Special case -> Handled differently in overpass query
+
+
 #######################################
-# Phase 1: Daten holen und darstellen
+# Phase 1: Retrieve data
 #######################################
 
 ########
@@ -38,7 +48,7 @@ if educational_bdg_gdf is not None:
     print(f"Total schools found: {len(educational_bdg_gdf)}")
 
 #######################################
-# Phase 2: StVO Regeln prüfen
+# Phase 2: Check for Potential
 #######################################
 
 # Zebra crossings
@@ -58,17 +68,16 @@ print("Identifying Gaps ...")
 gap_potential_result : PotentialCalculationResult= Tempo50GapPotential.find_all_tempo_50_gaps(gdf = streets_gdf)
 streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = gap_potential_result.street_ids, new_val = "T30_Potenzial_Luecke")
 
-# print only the maxspeed_
+#######################################
+# Phase 3: File / Print / Map Output
+#######################################
 
 streets_with_potential = streets_updated_gdf.loc[streets_updated_gdf["maxspeed_class"].isin(["T30_Potenzial_Zebrastreifen", "T30_Potenzial_Luecke", "T30_Potenzial_Schule"])]
 
 # Print if required
 PrintOutput.print_streets(streets_with_potential)
 
-other_streets = streets_updated_gdf.loc[~streets_updated_gdf["maxspeed_class"].isin(["T30_Potenzial_Zebrastreifen", "T30_Potenzial_Luecke", "T30_Potenzial_Schule"])]
-
-# TODO: Strip down zebra only for relevant ones
-GeoJsonCreator.create_geojson_layer_files(folder_name = "munich_half_final", streets_with_potential = streets_with_potential, streets_w_limit_gdf = streets_gdf, zebra_gdf = zebra_gdf, educational_bdg_gdf = educational_bdg_gdf)
+GeoJsonCreator.create_geojson_layer_files(folder_name = area_under_creation, streets_with_potential = streets_with_potential, streets_w_limit_gdf = streets_gdf, zebra_gdf = zebra_gdf, educational_bdg_gdf = educational_bdg_gdf)
 
 
 
