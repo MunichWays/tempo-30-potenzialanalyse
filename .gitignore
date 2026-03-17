@@ -1,0 +1,10 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# GeoJSON export folder
+GEOJSON_EXPORT/
+
+# OSM cache folder
+overpass_cache/
