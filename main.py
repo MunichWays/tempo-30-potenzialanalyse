@@ -16,7 +16,7 @@ from DataOutput.GeoJsonCreator import GeoJsonCreator
 from DataOutput.PrintOutput import PrintOutput
 from DataOutput.StreetPlot import StreetPlot
 
-area_under_creation = "isarvorstadt"
+area_under_creation = "München"
 
 
 if(area_under_creation != "München"):
@@ -37,13 +37,26 @@ zebra_gdf = zebra_retrieval.fetch_zebra_crossings(used_bbox)
 
 StreetPlot.plot_map(streets_gdf = streets_gdf, zebra_gdf = zebra_gdf)
 
-school_retrieval = BuildingRetrieval(datatype = "educational_buildings", amenities = ["school, kindergarten"], name_filter_regex = r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule)")
+school_retrieval = BuildingRetrieval(datatype = "educational_buildings", amenities = ["school", "kindergarten"], name_filter_regex = r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule)")
 educational_bdg_gdf = school_retrieval.fetch(used_bbox)
 
 if educational_bdg_gdf is not None:
     print("Keys", educational_bdg_gdf.keys())
     print(educational_bdg_gdf)
     print(f"Total schools found: {len(educational_bdg_gdf)}")
+
+
+hospitals_retrieval = BuildingRetrieval(
+    amenities=["krankenhaus"],
+    datatype="hospitals"
+)
+
+hospitals_gdf = hospitals_retrieval.fetch(used_bbox)
+
+if hospitals_gdf is not None:
+    print("Keys", hospitals_gdf.keys())
+    print(hospitals_gdf)
+    print(f"Total hospitals found: {len(hospitals_gdf)}")
 
 #######################################
 # Identify potential
