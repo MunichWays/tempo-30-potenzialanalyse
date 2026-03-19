@@ -80,7 +80,7 @@ class StreetPlot:
             zorder=5,
         )
 
-    def plot_map(streets_gdf, zebra_gdf = None, educational_gdf = None, krankenhaus_gdf = None, figsize=(9, 9), debug_endpoints: bool = False):
+    def plot_map(streets_gdf, zebra_gdf = None, educational_gdf = None, hospital_gdf = None, figsize=(9, 9), debug_endpoints: bool = False):
         streets_gdf = streets_gdf.copy()
 
         streets_gdf.loc[streets_gdf["conditional_speed"] == "30", "maxspeed_class"] = "Zeitweise_30"
@@ -121,8 +121,8 @@ class StreetPlot:
                 label="Bildungseinrichtung"
             )
 
-        if krankenhaus_gdf is not None and len(krankenhaus_gdf) > 0:
-            krankenhaus_gdf.plot(
+        if hospital_gdf is not None and len(hospital_gdf) > 0:
+            hospital_gdf.plot(
                 ax=ax,
                 color = KRANKENHAUS_FARBE,
                 marker="o",
@@ -149,7 +149,7 @@ class StreetPlot:
                 Line2D([0], [0], color= BILDUNGSEINRICHTUNG_FARBE, lw=0, marker="o", markersize=10, label="Bildungseinrichtung")
             )
 
-        if krankenhaus_gdf is not None and len(krankenhaus_gdf) > 0:
+        if hospital_gdf is not None and len(hospital_gdf) > 0:
             legend_elements.append(
                 Line2D([0], [0], color= KRANKENHAUS_FARBE, lw=0, marker="o", markersize=10, label="Krankenhaus")
             )

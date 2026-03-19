@@ -5,7 +5,7 @@ import pandas as pd
 from pathlib import Path
 
 class GeoJsonCreator:
-    def create_geojson_layer_files(folder_name, streets_with_potential : gpd.GeoDataFrame, streets_w_limit_gdf, zebra_gdf, educational_bdg_gdf):
+    def create_geojson_layer_files(folder_name, streets_with_potential : gpd.GeoDataFrame, streets_w_limit_gdf, zebra_gdf, educational_bdg_gdf, hospitals_gdf):
         export_dir = Path("./") / "GEOJSON_EXPORT"  / folder_name
         export_dir.mkdir(parents=True, exist_ok=True)
          # --- Streets with potential only
@@ -18,16 +18,18 @@ class GeoJsonCreator:
         export_data_dict["zebra"] = zebra_gdf.copy()
         export_data_dict["potential_streets"] = streets_with_potential.copy()
         export_data_dict["streets_and_limit"] = streets_w_limit_gdf.copy()
+        export_data_dict["hospital"] = hospitals_gdf.copy()
 
         # Tag features
-        for entry in ["zebra", "education"]:
+        for entry in ["zebra", "education", "hospital"]:
             export_data_dict[entry]["feature_type"] = entry
 
 
         export_data_dict["potential_streets"]["feature_type"] = export_data_dict["potential_streets"]["maxspeed_class"].map({
             "T30_Potenzial_Zebrastreifen": "zebra_potential",
             "T30_Potenzial_Schule": "school_potential",
-            "T30_Potenzial_Luecke": "gap_potential"
+            "T30_Potenzial_Luecke": "gap_potential",
+            "T30_Potenzial_Krankenhaus" : "hospital_potential"
         })
 
         # Bundle speed limits
@@ -75,16 +77,17 @@ class GeoJsonCreator:
             "street"
         ]]
 
-        export_data_dict["education"] = export_data_dict["education"][[
-            "name",
-            "feature_type",
-            "geometry",
-            "potential_candidate",
-            "street",
-            "housenumber",
-            "website",
-            "operator"
-        ]]
+        for building_type in ["education", "hospital"]:
+            export_data_dict[building_type] = export_data_dict[building_type][[
+                "name",
+                "feature_type",
+                "geometry",
+                "potential_candidate",
+                "street",
+                "housenumber",
+                "website",
+                "operator"
+            ]]
 
         # Export
 

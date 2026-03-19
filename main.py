@@ -16,7 +16,7 @@ from DataOutput.GeoJsonCreator import GeoJsonCreator
 from DataOutput.PrintOutput import PrintOutput
 from DataOutput.StreetPlot import StreetPlot
 
-area_under_creation = "isarvorstadt"
+area_under_creation = "München"
 
 
 if(area_under_creation != "München"):
@@ -87,6 +87,7 @@ streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf
 
 zebra_gdf["potential_candidate"] = zebra_gdf["osm_id"].isin(zebra_potential_result.opt_source_ids)
 educational_bdg_gdf["potential_candidate"] = educational_bdg_gdf["osm_id"].isin(educational_potential_result.opt_source_ids)
+hospitals_gdf["potential_candidate"] = hospitals_gdf["osm_id"].isin(hospital_potential_result.opt_source_ids)
 
 #######################################
 # File / Print / Map Output
@@ -97,12 +98,12 @@ streets_with_potential = streets_updated_gdf.loc[streets_updated_gdf["maxspeed_c
 # Print if required
 PrintOutput.print_streets(streets_with_potential)
 
-GeoJsonCreator.create_geojson_layer_files(folder_name = area_under_creation, streets_with_potential = streets_with_potential, streets_w_limit_gdf = streets_gdf, zebra_gdf = zebra_gdf, educational_bdg_gdf = educational_bdg_gdf)
+GeoJsonCreator.create_geojson_layer_files(folder_name = area_under_creation, streets_with_potential = streets_with_potential, streets_w_limit_gdf = streets_gdf, zebra_gdf = zebra_gdf, educational_bdg_gdf = educational_bdg_gdf, hospitals_gdf = hospitals_gdf)
 
 
 
 # Plotting
 
-StreetPlot.plot_map(streets_gdf = streets_updated_gdf, zebra_gdf = zebra_gdf, educational_gdf = educational_bdg_gdf)
+StreetPlot.plot_map(streets_gdf = streets_updated_gdf, zebra_gdf = zebra_gdf, educational_gdf = educational_bdg_gdf, hospital_gdf = hospitals_gdf)
 
 plt.show()
