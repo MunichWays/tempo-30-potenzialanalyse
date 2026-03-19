@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 
 from DataRetrieval.SegmentRetrieval import SegmentRetrieval
 from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
-from DataRetrieval.EducationalBdgRetrieval import EducationalBuildingRetrieval
+from DataRetrieval.BuildingRetrieval import BuildingRetrieval
 
 from PotentialCalculation.ZebraPotential import ZebraPotential
 from PotentialCalculation.EducationBdgPotential import EducationBdgPotential
@@ -39,8 +39,8 @@ zebra_gdf = zebra_retrieval.fetch_zebra_crossings(used_bbox)
 
 StreetPlot.plot_map(streets_gdf = streets_gdf, zebra_gdf = zebra_gdf)
 
-school_retrieval = EducationalBuildingRetrieval()
-educational_bdg_gdf = school_retrieval.fetch_education_bdg_with_name(used_bbox)
+school_retrieval = BuildingRetrieval(datatype = "educational_buildings", amenities = ["school, kindergarten"], name_filter_regex = r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule)")
+educational_bdg_gdf = school_retrieval.fetch(used_bbox)
 
 if educational_bdg_gdf is not None:
     print("Keys", educational_bdg_gdf.keys())
