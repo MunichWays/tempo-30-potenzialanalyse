@@ -11,7 +11,8 @@ SPEED_COLOR_MAP = {
     "Keine_Daten" : "#dddddd", 
     "T30_Potenzial_Zebrastreifen" : "purple",
     "T30_Potenzial_Luecke" : "darkred", 
-    "T30_Potenzial_Schule" : "orange"
+    "T30_Potenzial_Schule" : "orange",
+    "T30_Potenzial_Krankenhaus" : "red"
     #"50_StdInnerorts": "#d62728"  # red
 }
 
@@ -20,6 +21,7 @@ import geopandas as gpd
 
 ZEBRASTREIFEN_FARBE = "black" # violett
 BILDUNGSEINRICHTUNG_FARBE = "violet"
+KRANKENHAUS_FARBE = "red"
 
 class StreetPlot:
 
@@ -78,7 +80,7 @@ class StreetPlot:
             zorder=5,
         )
 
-    def plot_map(streets_gdf, zebra_gdf = None, educational_gdf = None, figsize=(9, 9), debug_endpoints: bool = False):
+    def plot_map(streets_gdf, zebra_gdf = None, educational_gdf = None, krankenhaus_gdf = None, figsize=(9, 9), debug_endpoints: bool = False):
         streets_gdf = streets_gdf.copy()
 
         streets_gdf.loc[streets_gdf["conditional_speed"] == "30", "maxspeed_class"] = "Zeitweise_30"
@@ -118,6 +120,15 @@ class StreetPlot:
                 markersize=15,
                 label="Bildungseinrichtung"
             )
+
+        if krankenhaus_gdf is not None and len(krankenhaus_gdf) > 0:
+            krankenhaus_gdf.plot(
+                ax=ax,
+                color = KRANKENHAUS_FARBE,
+                marker="o",
+                markersize=15,
+                label="Bildungseinrichtung"
+            )
             
 
         # build street legend manually (categorical)
@@ -136,6 +147,11 @@ class StreetPlot:
         if educational_gdf is not None and len(educational_gdf) > 0:
             legend_elements.append(
                 Line2D([0], [0], color= BILDUNGSEINRICHTUNG_FARBE, lw=0, marker="o", markersize=10, label="Bildungseinrichtung")
+            )
+
+        if krankenhaus_gdf is not None and len(krankenhaus_gdf) > 0:
+            legend_elements.append(
+                Line2D([0], [0], color= KRANKENHAUS_FARBE, lw=0, marker="o", markersize=10, label="Krankenhaus")
             )
 
         ax.legend(

@@ -16,7 +16,7 @@ from DataOutput.GeoJsonCreator import GeoJsonCreator
 from DataOutput.PrintOutput import PrintOutput
 from DataOutput.StreetPlot import StreetPlot
 
-area_under_creation = "München"
+area_under_creation = "isarvorstadt"
 
 
 if(area_under_creation != "München"):
@@ -47,15 +47,16 @@ if educational_bdg_gdf is not None:
 
 
 hospitals_retrieval = BuildingRetrieval(
-    amenities=["krankenhaus"],
-    datatype="hospitals"
+    amenities=["hospital"],
+    datatype="hospitals",
+    name_filter_regex=r"(krankenhaus|klinikum)"
 )
 
 hospitals_gdf = hospitals_retrieval.fetch(used_bbox)
 
 if hospitals_gdf is not None:
     print("Keys", hospitals_gdf.keys())
-    print(hospitals_gdf)
+    print(hospitals_gdf["name"])
     print(f"Total hospitals found: {len(hospitals_gdf)}")
 
 #######################################
@@ -67,6 +68,8 @@ print("Identifying Zebra Crossings ...")
 zebra_potential_result : PotentialCalculationResult = ZebraPotential.find_tempo50_segments_near_zebra(streets_gdf = streets_gdf, zebras_gdf = zebra_gdf, search_distance_m = 15)
 print("Identifiying Street near schools")
 educational_potential_result : PotentialCalculationResult = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = educational_bdg_gdf, search_distance_m = 50)
+print("Identifiying Street near hospitals")
+hospital_potential_result : PotentialCalculationResult = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = hospitals_gdf, search_distance_m = 50)
 print("Identifying Gaps ...")
 gap_potential_result : PotentialCalculationResult= Tempo50GapPotential.find_all_tempo_50_gaps(gdf = streets_gdf)
 
@@ -75,6 +78,7 @@ gap_potential_result : PotentialCalculationResult= Tempo50GapPotential.find_all_
 #######################################
 streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_gdf, osm_ids_to_annotate = zebra_potential_result.street_ids, new_val = "T30_Potenzial_Zebrastreifen")
 streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = educational_potential_result.street_ids, new_val = "T30_Potenzial_Schule")
+streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = hospital_potential_result.street_ids, new_val = "T30_Potenzial_Krankenhaus")
 streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = gap_potential_result.street_ids, new_val = "T30_Potenzial_Luecke")
 
 #######################################
@@ -88,7 +92,7 @@ educational_bdg_gdf["potential_candidate"] = educational_bdg_gdf["osm_id"].isin(
 # File / Print / Map Output
 #######################################
 
-streets_with_potential = streets_updated_gdf.loc[streets_updated_gdf["maxspeed_class"].isin(["T30_Potenzial_Zebrastreifen", "T30_Potenzial_Luecke", "T30_Potenzial_Schule"])]
+streets_with_potential = streets_updated_gdf.loc[streets_updated_gdf["maxspeed_class"].isin(["T30_Potenzial_Zebrastreifen", "T30_Potenzial_Luecke", "T30_Potenzial_Schule", "T30_Potenzial_Krankenhaus"])]
 
 # Print if required
 PrintOutput.print_streets(streets_with_potential)
