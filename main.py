@@ -5,7 +5,7 @@ from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
 from DataRetrieval.BuildingRetrieval import BuildingRetrieval
 
 from PotentialCalculation.ZebraPotential import ZebraPotential
-from PotentialCalculation.EducationBdgPotential import EducationBdgPotential
+from PotentialCalculation.ProximityPotential import ProximityPotential
 from PotentialCalculation.GapPotential import Tempo50GapPotential
 from PotentialCalculation.PotentialCalculationResult import PotentialCalculationResult
 
@@ -59,7 +59,7 @@ zebra_gdf["potential_candidate"] = zebra_gdf["osm_id"].isin(zebra_potential_resu
 
 # Educational buildings
 print("Identifiying Street near schools")
-educational_potential_result : PotentialCalculationResult = EducationBdgPotential.find_tempo50_segments_near_educ_bdgs(streets_gdf = streets_gdf, educational_bdg_gdf = educational_bdg_gdf, search_distance_m = 50)
+educational_potential_result : PotentialCalculationResult = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = educational_bdg_gdf, search_distance_m = 50)
 streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = educational_potential_result.street_ids, new_val = "T30_Potenzial_Schule")
 educational_bdg_gdf["potential_candidate"] = educational_bdg_gdf["osm_id"].isin(educational_potential_result.opt_source_ids)
 
