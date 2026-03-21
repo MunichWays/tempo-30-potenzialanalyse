@@ -12,16 +12,35 @@ SPEED_COLOR_MAP = {
     "T30_Potenzial_Zebrastreifen" : "purple",
     "T30_Potenzial_Luecke" : "darkred", 
     "T30_Potenzial_Schule" : "orange",
-    "T30_Potenzial_Krankenhaus" : "red"
+    "T30_Potenzial_Krankenhaus" : "red",
+    "T30_Potential_Altenheim": "yellow"
     #"50_StdInnerorts": "#d62728"  # red
+}
+
+BUILDING_PLOT_DEFINITON = {
+    "hospitals" : {
+        "color" : "red",
+        "marker": "o",
+        "label" : "Krankenhaus"
+    },
+    "educational_buildings":
+    {
+        "color" : "orange",
+        "marker" : "o",
+        "label" : "Bildungseinrichtung"
+    },
+    "elderly_homes":
+    {
+        "color" : "yellow",
+        "marker" : "o",
+        "label" : "Senioreneinrichtung"
+    }
 }
 
 from shapely.geometry import Point, LineString, MultiLineString
 import geopandas as gpd
 
 ZEBRASTREIFEN_FARBE = "black" # violett
-BILDUNGSEINRICHTUNG_FARBE = "violet"
-KRANKENHAUS_FARBE = "red"
 
 class StreetPlot:
 
@@ -80,7 +99,7 @@ class StreetPlot:
             zorder=5,
         )
 
-    def plot_map(streets_gdf, zebra_gdf = None, educational_gdf = None, hospital_gdf = None, figsize=(9, 9), debug_endpoints: bool = False):
+    def plot_map(streets_gdf, zebra_gdf = None, bdg_data = None, figsize=(9, 9), debug_endpoints: bool = False):
         streets_gdf = streets_gdf.copy()
 
         streets_gdf.loc[streets_gdf["conditional_speed"] == "30", "maxspeed_class"] = "Zeitweise_30"
@@ -111,25 +130,18 @@ class StreetPlot:
                 markersize=30,
                 label="Zebrastreifen"
             )
-            
-        if educational_gdf is not None and len(educational_gdf) > 0:
-            educational_gdf.plot(
-                ax=ax,
-                color = BILDUNGSEINRICHTUNG_FARBE,
-                marker="o",
-                markersize=15,
-                label="Bildungseinrichtung"
-            )
-
-        if hospital_gdf is not None and len(hospital_gdf) > 0:
-            hospital_gdf.plot(
-                ax=ax,
-                color = KRANKENHAUS_FARBE,
-                marker="o",
-                markersize=15,
-                label="Bildungseinrichtung"
-            )
-            
+        
+        if(bdg_data is not None):
+            for key, data in bdg_data.items():
+                entry_in_definition = BUILDING_PLOT_DEFINITON[key]
+                if data is not None and len(data) > 0:
+                    data.plot(
+                        ax=ax,
+                        color = entry_in_definition["color"],
+                        marker=entry_in_definition["marker"],
+                        markersize=15,
+                        label=entry_in_definition["label"]
+                    )
 
         # build street legend manually (categorical)
         from matplotlib.lines import Line2D
@@ -144,15 +156,12 @@ class StreetPlot:
                 Line2D([0], [0], color= ZEBRASTREIFEN_FARBE, lw=0, marker="x", markersize=10, label="Zebrastreifen")
             )
 
-        if educational_gdf is not None and len(educational_gdf) > 0:
-            legend_elements.append(
-                Line2D([0], [0], color= BILDUNGSEINRICHTUNG_FARBE, lw=0, marker="o", markersize=10, label="Bildungseinrichtung")
-            )
-
-        if hospital_gdf is not None and len(hospital_gdf) > 0:
-            legend_elements.append(
-                Line2D([0], [0], color= KRANKENHAUS_FARBE, lw=0, marker="o", markersize=10, label="Krankenhaus")
-            )
+        if(bdg_data is not None):
+            for key, data in bdg_data.items():
+                entry_in_definition = BUILDING_PLOT_DEFINITON[key]
+                legend_elements.append(
+                    Line2D([0], [0], color= entry_in_definition["color"], lw=0, marker=entry_in_definition["marker"], markersize=10, label = entry_in_definition["label"])
+                )
 
         ax.legend(
             handles=legend_elements,
