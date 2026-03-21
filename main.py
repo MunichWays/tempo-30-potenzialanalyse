@@ -47,8 +47,8 @@ building_configs = {
         "speed_annotation" : "T30_Potenzial_Krankenhaus"
     },
     "elderly_homes": {
-        "amenities": ["nursing_home", "retirement_home", "care_home"],
-        "regex": r"(senioren|pflege|alten)",
+        "amenities": ["nursing_home", "retirement_home", "care_home", "social_facility"],
+        "regex": r"(alten|pflegeheim|pflege-heim|senioren|stift)",
         "speed_annotation" : "T30_Potenzial_Altenheim"
     }
 }
