@@ -37,18 +37,25 @@ StreetPlot.plot_map(streets_gdf = streets_gdf, zebra_gdf = zebra_gdf)
 
 building_configs = {
     "educational_buildings": {
-        "amenities": ["school", "kindergarten"],
+        "tags": {
+            "amenity": ["school", "kindergarten"]
+        },
         "regex": r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule)",
         "speed_annotation" : "T30_Potenzial_Schule"
     },
     "hospitals": {
-        "amenities": ["hospital"],
+        "tags": {
+            "amenity" :  ["hospital"]
+        },
         "regex": r"(krankenhaus|klinikum)",
         "speed_annotation" : "T30_Potenzial_Krankenhaus"
     },
     "elderly_homes": {
-        "amenities": ["nursing_home", "retirement_home", "care_home", "social_facility"],
-        "regex": r"(alten|pflegeheim|pflege-heim|senioren|stift)",
+        "tags": {
+            "amenity": ["nursing_home", "retirement_home", "care_home"],
+            "social_facility": ["nursing_home", "assisted_living"]
+        },
+        "regex": r"(pflegeheim|pflege-heim|senior|alten|residenz|stift)",
         "speed_annotation" : "T30_Potenzial_Altenheim"
     }
 }

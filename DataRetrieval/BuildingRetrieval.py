@@ -2,7 +2,7 @@ import re
 import requests
 import geopandas as gpd
 
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Dict
 
 from shapely.geometry import Point, LineString, Polygon
 
@@ -22,11 +22,11 @@ class BuildingRetrieval:
     def __init__(
         self,
         datatype: str,
-        amenities: List[str],
+        tags: Dict[str, List[str]],   # 👈 instead of amenities
         name_filter_regex: Optional[str] = None,
         timeout: int = 60,
     ):
-        self.amenities = amenities
+        self.tags = tags
         self.timeout = timeout
         self.name_filter_regex = (
             re.compile(name_filter_regex, re.IGNORECASE)
@@ -40,16 +40,23 @@ class BuildingRetrieval:
     # Query builder
     # ------------------------------------------------------------------
     def _build_query(self, bbox: Tuple[float, float, float, float]) -> str:
-        amenity_regex = "|".join(self.amenities)
+        def build_blocks(bbox_str):
+            blocks = []
+            for key, values in self.tags.items():
+                regex = "|".join(values)
+
+                blocks.append(f'node["{key}"~"{regex}"]{bbox_str};')
+                blocks.append(f'way["{key}"~"{regex}"]{bbox_str};')
+                blocks.append(f'relation["{key}"~"{regex}"]{bbox_str};')
+
+            return "\n".join(blocks)
 
         if isinstance(bbox, str):
             return f"""
             [out:json][timeout:{self.timeout}];
             (
-              area[admin_level=6]["name"="{bbox}"]->.boundaryarea;
-              node["amenity"~"{amenity_regex}"](area.boundaryarea);
-              way["amenity"~"{amenity_regex}"](area.boundaryarea);
-              relation["amenity"~"{amenity_regex}"](area.boundaryarea);
+            area[admin_level=6]["name"="{bbox}"]->.boundaryarea;
+            {build_blocks("(area.boundaryarea)")}
             );
             out tags body;
             >;
@@ -57,12 +64,12 @@ class BuildingRetrieval:
             """
         else:
             south, west, north, east = bbox
+            bbox_str = f"({south},{west},{north},{east})"
+
             return f"""
             [out:json][timeout:{self.timeout}];
             (
-              node["amenity"~"{amenity_regex}"]({south},{west},{north},{east});
-              way["amenity"~"{amenity_regex}"]({south},{west},{north},{east});
-              relation["amenity"~"{amenity_regex}"]({south},{west},{north},{east});
+            {build_blocks(bbox_str)}
             );
             out tags body;
             >;

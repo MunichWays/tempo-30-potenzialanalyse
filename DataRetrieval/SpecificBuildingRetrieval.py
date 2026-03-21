@@ -12,7 +12,7 @@ class SpecificBuildingRetrieval:
         for datatype, config in building_configs.items():
             retrieval = BuildingRetrieval(
                 datatype=datatype,
-                amenities=config["amenities"],
+                tags=config["tags"],
                 name_filter_regex=config.get("regex", None)
             )
             
