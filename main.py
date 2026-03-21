@@ -57,7 +57,15 @@ building_configs = {
         },
         "regex": r"(pflegeheim|pflege-heim|senior|alten|residenz|stift)",
         "speed_annotation" : "T30_Potenzial_Altenheim"
-    }
+    },
+    "playgrounds": {
+        "tags": {
+            "amenity": ["playground"],
+            "leisure": ["playground"]
+    },
+    "regex": None,
+    "speed_annotation": "T30_Potenzial_Spielplatz"
+}
 }
 building_data = SpecificBuildingRetrieval.retrieve_building_data(bbox = used_bbox, building_configs = building_configs)
 

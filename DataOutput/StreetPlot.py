@@ -13,7 +13,8 @@ SPEED_COLOR_MAP = {
     "T30_Potenzial_Luecke" : "darkred", 
     "T30_Potenzial_Schule" : "orange",
     "T30_Potenzial_Krankenhaus" : "red",
-    "T30_Potential_Altenheim": "yellow"
+    "T30_Potential_Altenheim": "yellow",
+    "T30_Potenzial_Spielplatz": "#f64003"
     #"50_StdInnerorts": "#d62728"  # red
 }
 
@@ -34,6 +35,12 @@ BUILDING_PLOT_DEFINITON = {
         "color" : "yellow",
         "marker" : "o",
         "label" : "Senioreneinrichtung"
+    },
+    "playgrounds":
+    {
+        "color" : "#f64003",
+        "marker" : "x",
+        "label" : "Playground"
     }
 }
 
