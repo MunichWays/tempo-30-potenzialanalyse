@@ -81,7 +81,7 @@ zebra_potential_result : PotentialCalculationResult = ZebraPotential.find_tempo5
 building_potential_results : dict[str, PotentialCalculationResult] = {}
 for key in building_data.keys():
     print(f"Identifiying Street near {key}")
-    building_potential_results[key] = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = building_data[key], search_distance_m = 50)
+    building_potential_results[key] = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = building_data[key], search_distance_m = 20)
 
 print("Identifying Gaps ...")
 gap_potential_result : PotentialCalculationResult= Tempo50GapPotential.find_all_tempo_50_gaps(gdf = streets_gdf)

@@ -23,11 +23,12 @@ class GeoJsonCreator:
 
 
         export_data_dict["potential_streets"]["feature_type"] = export_data_dict["potential_streets"]["maxspeed_class"].map({
-            "T30_Potenzial_Zebrastreifen": "zebra_potential",
-            "T30_Potenzial_Schule": "school_potential",
-            "T30_Potenzial_Luecke": "gap_potential",
-            "T30_Potenzial_Krankenhaus" : "hospital_potential",
-            "T30_Potenzial_Altenheim": "elderly_home_potential"
+            "T30_Potenzial_Zebrastreifen": "Potenzial durch Zebrastreifen",
+            "T30_Potenzial_Schule": "Potenzial durch Bildungseinrichtung",
+            "T30_Potenzial_Luecke": "Potenzial durch Lückenschluss",
+            "T30_Potenzial_Krankenhaus" : "Potenzial durch Krankenhaus",
+            "T30_Potenzial_Altenheim": "Potenzial durch Seniorenwohnheim",
+            "T30_Potenzial_Spielplatz" : "Potenzial durch Spielplatz"
         })
 
         # Bundle speed limits
@@ -85,8 +86,11 @@ class GeoJsonCreator:
                 "operator"
             ]]
 
-        # Export
+        # Remove metadata for playgrounds
+        for key in ["housenumber", "street", "website", "operator"]:
+            building_data["playgrounds"].pop(key)
 
+        # Export
         for entry in export_data_dict.keys():
             filename = entry + ".geojson"
             output_file = export_dir / filename
