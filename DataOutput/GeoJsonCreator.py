@@ -28,7 +28,8 @@ class GeoJsonCreator:
             "T30_Potenzial_Luecke": "Potenzial durch Lückenschluss",
             "T30_Potenzial_Krankenhaus" : "Potenzial durch Krankenhaus",
             "T30_Potenzial_Altenheim": "Potenzial durch Seniorenwohnheim",
-            "T30_Potenzial_Spielplatz" : "Potenzial durch Spielplatz"
+            "T30_Potenzial_Spielplatz" : "Potenzial durch Spielplatz",
+            "T30_Potenzial_Behinderteneinrichtung" : "Potenzial durch Behinderteneinrichtung"
         })
 
         # Bundle speed limits

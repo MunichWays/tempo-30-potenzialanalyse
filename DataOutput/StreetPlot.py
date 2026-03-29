@@ -14,7 +14,8 @@ SPEED_COLOR_MAP = {
     "T30_Potenzial_Schule" : "orange",
     "T30_Potenzial_Krankenhaus" : "red",
     "T30_Potential_Altenheim": "yellow",
-    "T30_Potenzial_Spielplatz": "#f64003"
+    "T30_Potenzial_Spielplatz": "#f64003",
+    "T30_Potenzial_Behinderteneinrichtung" : "#A89403"
     #"50_StdInnerorts": "#d62728"  # red
 }
 
@@ -41,7 +42,13 @@ BUILDING_PLOT_DEFINITON = {
         "color" : "#f64003",
         "marker" : "x",
         "label" : "Playground"
-    }
+    },
+    "disability_facilities":
+    {
+        "color" : "#A89403",
+        "marker" : "x",
+        "label" : "Behinderteneinrichtung"
+    },
 }
 
 from shapely.geometry import Point, LineString, MultiLineString

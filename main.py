@@ -65,7 +65,23 @@ building_configs = {
     },
     "regex": None,
     "speed_annotation": "T30_Potenzial_Spielplatz"
+    },
+    "disability_facilities": {
+        "tags": {
+            "amenity": ["social_facility", "clinic","craft"],
+            "social_facility": [
+                "assisted_living",
+                "group_home",
+                "workshop",
+                "rehabilitation",
+                "day_care"
+            ],
+            "healthcare": ["rehabilitation", "physiotherapy"]
+    },
+        "regex": r"(behinderung|behindert|lebenshilfe|inklusion|förderstätte|werkstatt|werkstätten)",
+        "speed_annotation": "T30_Potenzial_Behinderteneinrichtung"
 }
+
 }
 building_data = SpecificBuildingRetrieval.retrieve_building_data(bbox = used_bbox, building_configs = building_configs)
 
