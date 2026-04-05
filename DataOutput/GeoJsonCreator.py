@@ -21,16 +21,16 @@ class GeoJsonCreator:
         for key, data in building_data.items():
             export_data_dict[key] = data.copy()
 
-
-        export_data_dict["potential_streets"]["feature_type"] = export_data_dict["potential_streets"]["maxspeed_class"].map({
-            "T30_Potenzial_Zebrastreifen": "Potenzial durch Zebrastreifen",
-            "T30_Potenzial_Schule": "Potenzial durch Bildungseinrichtung",
-            "T30_Potenzial_Luecke": "Potenzial durch Lückenschluss",
-            "T30_Potenzial_Krankenhaus" : "Potenzial durch Krankenhaus",
-            "T30_Potenzial_Altenheim": "Potenzial durch Seniorenwohnheim",
-            "T30_Potenzial_Spielplatz" : "Potenzial durch Spielplatz",
-            "T30_Potenzial_Behinderteneinrichtung" : "Potenzial durch Behinderteneinrichtung"
-        })
+        export_data_dict["potential_streets"]["feature_type"] = \
+            export_data_dict["potential_streets"]["feature_type"].map({
+                "T30_Potenzial_Zebrastreifen": "Potenzial durch Zebrastreifen",
+                "T30_Potenzial_Schule": "Potenzial durch Bildungseinrichtung",
+                "T30_Potenzial_Luecke": "Potenzial durch Lückenschluss",
+                "T30_Potenzial_Krankenhaus": "Potenzial durch Krankenhaus",
+                "T30_Potenzial_Altenheim": "Potenzial durch Seniorenwohnheim",
+                "T30_Potenzial_Spielplatz": "Potenzial durch Spielplatz",
+                "T30_Potenzial_Behinderteneinrichtung": "Potenzial durch Behinderteneinrichtung"
+            })
 
         # Bundle speed limits
         mapping = {
@@ -54,6 +54,7 @@ class GeoJsonCreator:
         export_data_dict["potential_streets"] = export_data_dict["potential_streets"][[
             "osm_id",
             "name",
+            "maxspeed_class",
             "feature_type",
             "geometry"
         ]]

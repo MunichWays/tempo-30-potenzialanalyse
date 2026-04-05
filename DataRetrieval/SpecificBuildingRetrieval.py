@@ -17,9 +17,10 @@ class SpecificBuildingRetrieval:
             )
             
             gdf = retrieval.fetch(bbox)
-            building_data[datatype] = gdf
-            
+
             if gdf is not None:
+                building_data[datatype] = gdf
+
                 print(f"\n=== {datatype} ===")
                 print("Names:")
                 print(gdf["name"].head())

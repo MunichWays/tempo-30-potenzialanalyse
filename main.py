@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import time
 
 from DataRetrieval.SegmentRetrieval import SegmentRetrieval
 from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
@@ -40,7 +41,7 @@ building_configs = {
         "tags": {
             "amenity": ["school", "kindergarten"]
         },
-        "regex": r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule)",
+        "regex": r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule|sonderpädagogisches|berufschul|berufoberschule|montessori|japanische|simmernschule)",
         "speed_annotation" : "T30_Potenzial_Schule"
     },
     "hospitals": {
@@ -105,6 +106,9 @@ gap_potential_result : PotentialCalculationResult= Tempo50GapPotential.find_all_
 #######################################
 # Create street dataset w. Annotations
 #######################################
+
+#TODO: identify all ids first that have reasons for potential (&rmv from individual lists)
+
 streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_gdf, osm_ids_to_annotate = zebra_potential_result.street_ids, new_val = "T30_Potenzial_Zebrastreifen")
 
 for key, potential_result in building_potential_results.items():
@@ -128,7 +132,7 @@ for key, bdg_data in building_data.items():
 #######################################
 
 streets_with_potential = streets_updated_gdf[
-    streets_updated_gdf["maxspeed_class"].str.startswith("T30_Potenzial", na=False)
+    streets_updated_gdf["feature_type"].str.startswith("T30_Potenzial", na=False)
 ]
 
 # Print if required
