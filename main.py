@@ -81,51 +81,46 @@ building_configs = {
     },
         "regex": r"(behinderung|behindert|lebenshilfe|inklusion|förderstätte|werkstatt|werkstätten)",
         "speed_annotation": "T30_Potenzial_Behinderteneinrichtung"
+    }
 }
 
-}
 building_data = SpecificBuildingRetrieval.retrieve_building_data(bbox = used_bbox, building_configs = building_configs)
 
 #######################################
 # Identify potential
 #######################################
 
+potential_results : dict[str, PotentialCalculationResult] = {}
+
+
 # Zebra crossings
 print("Identifying Zebra Crossings ...")
-zebra_potential_result : PotentialCalculationResult = ZebraPotential.find_tempo50_segments_near_zebra(streets_gdf = streets_gdf, zebras_gdf = zebra_gdf, search_distance_m = 15)
+potential_results["zebra"] = ZebraPotential.find_tempo50_segments_near_zebra(streets_gdf = streets_gdf, zebras_gdf = zebra_gdf, search_distance_m = 15)
 
-# Buildings
-building_potential_results : dict[str, PotentialCalculationResult] = {}
 for key in building_data.keys():
     print(f"Identifiying Street near {key}")
-    building_potential_results[key] = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = building_data[key], search_distance_m = 20)
+    potential_results[key] = ProximityPotential.find_tempo50_segments_near_features(streets_gdf = streets_gdf, features_gdf = building_data[key], search_distance_m = 20)
 
 print("Identifying Gaps ...")
-gap_potential_result : PotentialCalculationResult= Tempo50GapPotential.find_all_tempo_50_gaps(gdf = streets_gdf)
+potential_results["gap"] = Tempo50GapPotential.find_all_tempo_50_gaps(gdf = streets_gdf)
+
+
+#######################################
+# Annotate features as relevant for potential
+#######################################
+
+zebra_gdf["potential_candidate"] = zebra_gdf["osm_id"].isin(potential_results["zebra"].opt_source_ids)
+
+for key, bdg_data in building_data.items():
+    corresponding_result = potential_results[key]
+    bdg_data["potential_candidate"] = bdg_data["osm_id"].isin(corresponding_result.opt_source_ids)
 
 #######################################
 # Create street dataset w. Annotations
 #######################################
 
-#TODO: identify all ids first that have reasons for potential (&rmv from individual lists)
+streets_updated_gdf = SpeedAnnotationUpdater.annotate_gdf_with_potential_type(streets_gdf, potential_results, building_configs)
 
-streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_gdf, osm_ids_to_annotate = zebra_potential_result.street_ids, new_val = "T30_Potenzial_Zebrastreifen")
-
-for key, potential_result in building_potential_results.items():
-    new_val = building_configs[key]["speed_annotation"]
-    streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = potential_result.street_ids, new_val = new_val)
-
-streets_updated_gdf = SpeedAnnotationUpdater.update_speed_annotation(streets_gdf = streets_updated_gdf, osm_ids_to_annotate = gap_potential_result.street_ids, new_val = "T30_Potenzial_Luecke")
-
-#######################################
-# Annotate sources
-#######################################
-
-zebra_gdf["potential_candidate"] = zebra_gdf["osm_id"].isin(zebra_potential_result.opt_source_ids)
-
-for key, bdg_data in building_data.items():
-    corresponding_result = building_potential_results[key]
-    bdg_data["potential_candidate"] = bdg_data["osm_id"].isin(corresponding_result.opt_source_ids)
 
 #######################################
 # File / Print / Map Output

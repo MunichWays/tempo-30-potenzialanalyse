@@ -15,7 +15,8 @@ SPEED_COLOR_MAP = {
     "T30_Potenzial_Krankenhaus" : "red",
     "T30_Potential_Altenheim": "yellow",
     "T30_Potenzial_Spielplatz": "#f64003",
-    "T30_Potenzial_Behinderteneinrichtung" : "#A89403"
+    "T30_Potenzial_Behinderteneinrichtung" : "#A89403",
+    "T30_Potenzial_Multifaktor" : "black"
     #"50_StdInnerorts": "#d62728"  # red
 }
 
