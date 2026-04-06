@@ -91,7 +91,7 @@ class GeoJsonCreator:
 
         # Remove metadata for playgrounds
         for key in ["housenumber", "street", "website", "operator"]:
-            building_data["playgrounds"].pop(key)
+            export_data_dict["playgrounds"].pop(key)
 
         # Export
         for entry in export_data_dict.keys():
