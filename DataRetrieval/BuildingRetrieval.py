@@ -89,10 +89,17 @@ class BuildingRetrieval:
         print(f"Querying Overpass API for {self.datacache.datatype}...")
         query = self._build_query(bbox)
 
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'text/plain',
+            'User-Agent': 'Speed-limit-30-tool', 
+        }
+
         response = requests.post(
             self.OVERPASS_URL,
             data={"data": query},
             timeout=self.timeout,
+            headers=headers
         )
         response.raise_for_status()
 

@@ -49,10 +49,17 @@ class SegmentRetrieval:
             """
 
     def _fetch_raw(self, query: str) -> dict:
+        headers = {
+            'Accept': 'application/json',
+            'Content-Type': 'text/plain',
+            'User-Agent': 'Speed-limit-30-tool', 
+        }
+
         response = requests.post(
             self.OVERPASS_URL,
             data={"data": query},
-            timeout=self.timeout
+            timeout=self.timeout,
+            headers=headers
         )
         response.raise_for_status()
         return response.json()

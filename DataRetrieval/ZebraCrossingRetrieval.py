@@ -56,7 +56,12 @@ class ZebraCrossingRetrieval:
             print("Querying OverpassAPI for Zebra Crossings")
             # not cached → query Overpass
             query = self._build_query(bbox)
-            response = requests.post(self.OVERPASS_URL, data={"data": query}, timeout=self.timeout)
+            headers = {
+                'Accept': 'application/json',
+                'Content-Type': 'text/plain',
+                'User-Agent': 'Speed-limit-30-tool', 
+            }
+            response = requests.post(self.OVERPASS_URL, data={"data": query}, timeout=self.timeout, headers=headers)
             response.raise_for_status()
             data = response.json()
 
