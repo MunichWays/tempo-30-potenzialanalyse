@@ -1,8 +1,11 @@
 
 import geopandas as gpd
 import pandas as pd
+import json
 
 from pathlib import Path
+
+from DataOutput.PlaygroundConsolidation import PlaygroundConsolidation
 
 class GeoJsonCreator:
     def create_geojson_layer_files(folder_name, streets_with_potential : gpd.GeoDataFrame, streets_w_limit_gdf, zebra_gdf, building_data):
@@ -93,11 +96,20 @@ class GeoJsonCreator:
         for key in ["housenumber", "street", "website", "operator"]:
             export_data_dict["playgrounds"].pop(key)
 
+        export_data_dict["playgrounds"] = PlaygroundConsolidation.summarize_playground_features(playgroundGDF = export_data_dict["playgrounds"])
+
         # Export
         for entry in export_data_dict.keys():
+            geojson = json.loads(export_data_dict[entry].to_json())
+
+            for f in geojson["features"]:
+                f["properties"] = {k: v for k, v in f["properties"].items() if v is not None}
+
             filename = entry + ".geojson"
             output_file = export_dir / filename
-            export_data_dict[entry].to_file(output_file, driver="GeoJSON")
+            
+            with open(output_file, "w", encoding="utf-8") as file:
+                json.dump(geojson, file, separators=(",", ":"), ensure_ascii=False)
 
-            print(f"\n✅ GeoJSON successfully written to: {output_file}")
-            print(f"Total features exported: {len(export_data_dict[entry])}")
+                print(f"\n✅ GeoJSON successfully written to: {output_file}")
+                print(f"Total features exported: {len(export_data_dict[entry])}")
