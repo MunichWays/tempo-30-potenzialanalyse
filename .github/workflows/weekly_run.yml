@@ -26,10 +26,6 @@ jobs:
         run: |
           python main.py
 
-      - name: Debug: list generated files
-        run: |
-          ls -lah "GEOJSON_EXPORT/München" || echo "Output directory not found"
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
