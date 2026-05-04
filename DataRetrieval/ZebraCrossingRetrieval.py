@@ -1,6 +1,5 @@
 import requests
-import json
-import hashlib
+import time
 from pathlib import Path
 from typing import Tuple
 
@@ -56,18 +55,31 @@ class ZebraCrossingRetrieval:
             print("Querying OverpassAPI for Zebra Crossings")
             # not cached → query Overpass
             query = self._build_query(bbox)
-            headers = {
-                'Accept': 'application/json',
-                'Content-Type': 'text/plain',
-                'User-Agent': 'Speed-limit-30-tool', 
-            }
-            response = requests.post(self.OVERPASS_URL, data={"data": query}, timeout=self.timeout, headers=headers)
-            response.raise_for_status()
-            data = response.json()
+
+            data = self._fetch_raw(query=query)
 
             self.datacache.store_data(data = data, bbox = bbox)
 
             return data
+        
+    def _fetch_raw(self, query):
+        for attempt in range(0, 6):
+            try:
+                headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'text/plain',
+                    'User-Agent': 'Speed-limit-30-tool', 
+                }
+                response = requests.post(self.OVERPASS_URL, data={"data": query}, timeout=self.timeout, headers=headers)
+                response.raise_for_status()
+                return response.json()
+
+            except requests.exceptions.RequestException:
+                    wait = min(60, 2 ** attempt)
+                    print(f"Retrying in {wait}s...")
+                    time.sleep(wait)
+
+        raise RuntimeError("Overpass failed")
 
     def fetch_zebra_crossings(self, bbox: Tuple[float, float, float, float]) -> gpd.GeoDataFrame:
         data = self._fetch_raw_cached(bbox)

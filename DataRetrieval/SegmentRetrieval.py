@@ -2,8 +2,8 @@ import requests
 from typing import Tuple
 import geopandas as gpd
 from shapely.geometry import LineString
-import json
-import hashlib
+import time
+
 from pathlib import Path
 
 from dataclasses import dataclass
@@ -49,20 +49,29 @@ class SegmentRetrieval:
             """
 
     def _fetch_raw(self, query: str) -> dict:
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'text/plain',
-            'User-Agent': 'Speed-limit-30-tool', 
-        }
+        for attempt in range(6):
+            try:
+                headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'text/plain',
+                    'User-Agent': 'Speed-limit-30-tool', 
+                }
 
-        response = requests.post(
-            self.OVERPASS_URL,
-            data={"data": query},
-            timeout=self.timeout,
-            headers=headers
-        )
-        response.raise_for_status()
-        return response.json()
+                response = requests.post(
+                    self.OVERPASS_URL,
+                    data={"data": query},
+                    timeout=self.timeout,
+                    headers=headers
+                )
+                response.raise_for_status()
+                return response.json()
+            
+            except requests.exceptions.RequestException:
+                wait = min(60, 2 ** attempt)
+                print(f"Retrying in {wait}s...")
+                time.sleep(wait)
+
+        raise RuntimeError("Overpass failed")
 
 
     def _fetch_raw_cached(self, bbox: Tuple[float, float, float, float]) -> dict:

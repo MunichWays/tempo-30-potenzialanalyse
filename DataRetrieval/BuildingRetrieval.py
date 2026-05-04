@@ -1,5 +1,6 @@
 import re
 import requests
+import time
 import geopandas as gpd
 
 from typing import Tuple, Optional, List, Dict
@@ -85,28 +86,40 @@ class BuildingRetrieval:
         if cached is not None:
             print(f"Using cached data for {self.datacache.datatype}")
             return cached
+        else:
+            print(f"Querying Overpass API for {self.datacache.datatype}...")
+            query = self._build_query(bbox)
 
-        print(f"Querying Overpass API for {self.datacache.datatype}...")
-        query = self._build_query(bbox)
+            data = self._fetch_raw(query=query)
+            self.datacache.store_data(data=data, bbox=bbox)
 
-        headers = {
-            'Accept': 'application/json',
-            'Content-Type': 'text/plain',
-            'User-Agent': 'Speed-limit-30-tool', 
-        }
+            return data
+        
+    def _fetch_raw(self, query : str):
+        for attempt in range(6):
+            try:
+                headers = {
+                    'Accept': 'application/json',
+                    'Content-Type': 'text/plain',
+                    'User-Agent': 'Speed-limit-30-tool', 
+                }
 
-        response = requests.post(
-            self.OVERPASS_URL,
-            data={"data": query},
-            timeout=self.timeout,
-            headers=headers
-        )
-        response.raise_for_status()
+                response = requests.post(
+                    self.OVERPASS_URL,
+                    data={"data": query},
+                    timeout=self.timeout,
+                    headers=headers
+                )
+                response.raise_for_status()
 
-        data = response.json()
-        self.datacache.store_data(data=data, bbox=bbox)
+                return response.json()
 
-        return data
+            except requests.exceptions.RequestException:
+                wait = min(60, 2 ** attempt)
+                print(f"Retrying in {wait}s...")
+                time.sleep(wait)
+
+        raise RuntimeError("Overpass failed")
 
     # ------------------------------------------------------------------
     # Public API
