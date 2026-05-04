@@ -1,0 +1,50 @@
+name: Weekly Python GeoJSON Export
+
+on:
+  schedule:
+    - cron: "0 3 * * 1"   # Every Monday at 03:00 UTC
+  workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Run main.py
+        run: |
+          python main.py
+
+      - name: Debug: list generated files
+        run: |
+          ls -lah "GEOJSON_EXPORT/München" || echo "Output directory not found"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: geojson_exports
+          path: GEOJSON_EXPORT/München/*.geojson
+          if-no-files-found: warn
+
+
+      # OPTIONAL: Upload to Server in the future
+      
+      #- name: Upload to server via SCP
+      #  uses: appleboy/scp-action@v0.1.7
+      #  with:
+      #    host: ${{ secrets.SERVER_HOST }}
+      #    username: ${{ secrets.SERVER_USER }}
+      #    key: ${{ secrets.SERVER_SSH_KEY }}
+      #    source: "GEOJSON_EXPORT/München/*.geojson"
+      #    target: "/remote/path/"
