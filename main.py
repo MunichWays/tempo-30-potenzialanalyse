@@ -1,9 +1,12 @@
 import matplotlib.pyplot as plt
 import time
 
-from DataRetrieval.SegmentRetrieval import SegmentRetrieval
-from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
-from DataRetrieval.SpecificBuildingRetrieval import SpecificBuildingRetrieval
+from DataRetrieval.OSMDataRetrieval import OSMDataRetrieval
+from DataExtractors.StreetsExtractor import StreetsExtractor
+from DataExtractors.ZebraExtractor import ZebraExtractor
+from DataExtractors.BuildingExtractor import BuildingExtractor
+
+from config.building_configs import building_configs
 
 from PotentialCalculation.ZebraPotential import ZebraPotential
 from PotentialCalculation.ProximityPotential import ProximityPotential
@@ -17,7 +20,7 @@ from DataOutput.GeoJsonCreator import GeoJsonCreator
 from DataOutput.PrintOutput import PrintOutput
 from DataOutput.StreetPlot import StreetPlot
 
-area_under_creation = "München"
+area_under_creation = "isarvorstadt"
 
 if(area_under_creation != "München"):
     used_bbox = BoundingBoxStorage.get(area_under_creation)
@@ -28,63 +31,25 @@ else:
 # Retrieve (and print) raw data
 #######################################
 
-sr = SegmentRetrieval()
-streets_gdf = sr.fetch_as_geodataframe(used_bbox)
 
-zebra_retrieval = ZebraCrossingRetrieval(timeout=120)
-zebra_gdf = zebra_retrieval.fetch_zebra_crossings(used_bbox)
+# 1️⃣ Fetch Overpass once
+retrieval = OSMDataRetrieval()
+raw_data = retrieval.fetch(used_bbox, building_configs)
 
-StreetPlot.plot_map(streets_gdf = streets_gdf, zebra_gdf = zebra_gdf)
+# 2️⃣ Extract relevant data and separate
+streets_gdf = StreetsExtractor.extract(raw_data)
+zebra_gdf = ZebraExtractor.extract(raw_data)
 
-building_configs = {
-    "educational_buildings": {
-        "tags": {
-            "amenity": ["school", "kindergarten"]
-        },
-        "regex": r"(kindergarten|grundschule|hauptschule|realschule|mittelschule|gymnasium|gesamtschule|sonderpädagogisches|berufschul|berufoberschule|montessori|japanische|simmernschule)",
-        "speed_annotation" : "T30_Potenzial_Schule"
-    },
-    "hospitals": {
-        "tags": {
-            "amenity" :  ["hospital"]
-        },
-        "regex": r"(krankenhaus|klinikum)",
-        "speed_annotation" : "T30_Potenzial_Krankenhaus"
-    },
-    "elderly_homes": {
-        "tags": {
-            "amenity": ["nursing_home", "retirement_home", "care_home"],
-            "social_facility": ["nursing_home", "assisted_living"]
-        },
-        "regex": r"(pflegeheim|pflege-heim|senior|alten|residenz|stift)",
-        "speed_annotation" : "T30_Potenzial_Altenheim"
-    },
-    "playgrounds": {
-        "tags": {
-            "amenity": ["playground"],
-            "leisure": ["playground"]
-    },
-    "regex": None,
-    "speed_annotation": "T30_Potenzial_Spielplatz"
-    },
-    "disability_facilities": {
-        "tags": {
-            "amenity": ["social_facility", "clinic","craft"],
-            "social_facility": [
-                "assisted_living",
-                "group_home",
-                "workshop",
-                "rehabilitation",
-                "day_care"
-            ],
-            "healthcare": ["rehabilitation", "physiotherapy"]
-    },
-        "regex": r"(behinderung|behindert|lebenshilfe|inklusion|förderstätte|werkstatt|werkstätten)",
-        "speed_annotation": "T30_Potenzial_Behinderteneinrichtung"
-    }
+building_data = {
+    key: BuildingExtractor.extract(raw_data, cfg)
+    for key, cfg in building_configs.items()
 }
 
-building_data = SpecificBuildingRetrieval.retrieve_building_data(bbox = used_bbox, building_configs = building_configs)
+print("Streets:", len(streets_gdf))
+print("Zebra:", len(zebra_gdf))
+for k, v in building_data.items():
+    print(k, len(v))
+
 
 #######################################
 # Identify potential
