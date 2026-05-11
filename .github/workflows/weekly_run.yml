@@ -29,7 +29,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: geojson_exports
+          name: geojson_exports_tempo30
           path: GEOJSON_EXPORT/München/*.geojson
           if-no-files-found: warn
 
