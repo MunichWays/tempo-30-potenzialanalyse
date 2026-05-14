@@ -32,15 +32,43 @@ jobs:
           name: geojson_exports_tempo30
           path: GEOJSON_EXPORT/München/*.geojson
           if-no-files-found: warn
+          
+      - name: Generate deployment timestamp
+        run: |
+          echo "DEPLOY_TIME=$(date +'%Y-%m-%d_%H-%M-%S')" >> $GITHUB_ENV
 
+      - name: Install lftp
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lftp
 
-      # OPTIONAL: Upload to Server in the future
-      
-      #- name: Upload to server via SCP
-      #  uses: appleboy/scp-action@v0.1.7
-      #  with:
-      #    host: ${{ secrets.SERVER_HOST }}
-      #    username: ${{ secrets.SERVER_USER }}
-      #    key: ${{ secrets.SERVER_SSH_KEY }}
-      #    source: "GEOJSON_EXPORT/München/*.geojson"
-      #    target: "/remote/path/"
+      - name: Upload GeoJSON release + update latest
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH }}
+        run: |
+
+          RELEASE_PATH="$FTP_BASE_PATH/releases/$DEPLOY_TIME"
+
+          echo "Deploying release to:"
+          echo "$RELEASE_PATH"
+
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<EOF
+
+          set ssl:verify-certificate no
+
+          # Ensure directories exist
+          mkdir -p $FTP_BASE_PATH/releases
+          mkdir -p $FTP_BASE_PATH/latest
+          mkdir -p $RELEASE_PATH
+
+          # Upload immutable release
+          mirror -R GEOJSON_EXPORT/München $RELEASE_PATH --overwrite
+
+          # Update latest snapshot
+          mirror -R GEOJSON_EXPORT/München $FTP_BASE_PATH/latest --overwrite
+
+          bye
+          EOF
