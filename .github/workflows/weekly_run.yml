@@ -107,6 +107,7 @@ jobs:
           echo "=== VALIDATION ==="
       
           RELEASE_COUNT=$(lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" -e "
+            set ssl:verify-certificate no
             cls -1 $RELEASE_PATH/*.geojson;
             bye
           " | wc -l)
