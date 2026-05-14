@@ -59,6 +59,9 @@ jobs:
 
           set ssl:verify-certificate no
 
+          # Find out, what the base path resolves to
+          cls
+
           # Ensure directories exist
           mkdir -p $FTP_BASE_PATH/releases
           mkdir -p $FTP_BASE_PATH/latest
