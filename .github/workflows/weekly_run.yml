@@ -72,3 +72,45 @@ jobs:
 
           bye
           EOF
+          
+      - name: Verify uploaded files
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH }}
+        run: |
+      
+          RELEASE_PATH="$FTP_BASE_PATH/releases/$DEPLOY_TIME"
+      
+          echo "Checking uploaded files..."
+      
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<EOF
+      
+          set ssl:verify-certificate no
+      
+          echo ""
+          echo "=== RELEASE DIRECTORY ==="
+          cls -1 $RELEASE_PATH
+      
+          echo ""
+          echo "=== LATEST DIRECTORY ==="
+          cls -1 $FTP_BASE_PATH/latest
+      
+          bye
+          EOF
+      
+          echo ""
+          echo "=== VALIDATION ==="
+      
+          RELEASE_COUNT=$(lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" -e "
+            cls -1 $RELEASE_PATH/*.geojson;
+            bye
+          " | wc -l)
+      
+          if [ "$RELEASE_COUNT" -eq 0 ]; then
+            echo "ERROR: No GeoJSON files found on FTP server!"
+            exit 1
+          fi
+      
+          echo "SUCCESS: $RELEASE_COUNT GeoJSON files uploaded."
