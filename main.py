@@ -138,6 +138,7 @@ GeoJsonCreator.create_geojson_layer_files(folder_name = area_under_creation, str
 
 
 # Plotting
+
 StreetPlot.plot_map(streets_gdf = streets_updated_gdf, zebra_gdf = zebra_gdf, bdg_data = building_data)
 
 plt.show()

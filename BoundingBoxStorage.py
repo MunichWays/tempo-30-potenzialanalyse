@@ -49,6 +49,12 @@ class BoundingBoxStorage:
             49.520,
             11.160
         ),
+        "olching": (
+            48.140,
+            11.250,
+            48.280,
+            11.410
+        ),
     }
 
     @classmethod

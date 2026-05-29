@@ -9,6 +9,10 @@ SPEED_COLOR_MAP = {
     "50": "lightblue", # "#fca456",       
     "60": "darkblue",
     "Keine_Daten" : "#dddddd", 
+    #"50_StdInnerorts": "#d62728"  # red
+}
+
+POTENTIAL_COLOR_MAP = {
     "T30_Potenzial_Zebrastreifen" : "purple",
     "T30_Potenzial_Luecke" : "darkred", 
     "T30_Potenzial_Schule" : "orange",
@@ -17,7 +21,6 @@ SPEED_COLOR_MAP = {
     "T30_Potenzial_Spielplatz": "#f64003",
     "T30_Potenzial_Behinderteneinrichtung" : "#A89403",
     "T30_Potenzial_Multifaktor" : "black"
-    #"50_StdInnerorts": "#d62728"  # red
 }
 
 BUILDING_PLOT_DEFINITON = {
@@ -122,6 +125,15 @@ class StreetPlot:
         # assign colors, fallback = gray
         streets_gdf["plot_color"] = streets_gdf["maxspeed_class"].map(SPEED_COLOR_MAP).fillna("#7f7f7f")
 
+        # overwrite only rows whose feature_type exists in POTENTIAL_COLOR_MAP
+        if "feature_type" in streets_gdf.columns:
+            mask = streets_gdf["feature_type"].isin(POTENTIAL_COLOR_MAP.keys())
+
+            streets_gdf.loc[mask, "plot_color"] = (
+                streets_gdf.loc[mask, "feature_type"]
+                .map(POTENTIAL_COLOR_MAP)
+            )
+
         fig, ax = plt.subplots(figsize=figsize)
 
         # plot streets
@@ -165,11 +177,17 @@ class StreetPlot:
             for label, color in SPEED_COLOR_MAP.items()
         ]
 
-        # add zebra legend item
         if zebra_gdf is not None and len(zebra_gdf) > 0:
             legend_elements.append(
                 Line2D([0], [0], color= ZEBRASTREIFEN_FARBE, lw=0, marker="x", markersize=10, label="Zebrastreifen")
             )
+
+        # add zebra legend item
+        if "feature_type" in streets_gdf.columns:
+            for feature_type, color in POTENTIAL_COLOR_MAP.items():
+                legend_elements.append(
+                    Line2D([0], [0], color=color, lw=3, label=feature_type)
+                )
 
         if(bdg_data is not None):
             for key, data in bdg_data.items():
