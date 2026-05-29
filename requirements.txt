@@ -4,3 +4,4 @@ shapely
 matplotlib
 scikit-learn
 pathlib
+tqdm
