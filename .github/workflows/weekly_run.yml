@@ -2,7 +2,7 @@ name: Weekly Python GeoJSON Export
 
 on:
   schedule:
-    - cron: "0 3 * * 1"   # Every Monday at 03:00 UTC
+    - cron: "0 21 * * 0"   # Runs at 21:00 UTC, only on Sunday
   workflow_dispatch:
 
 jobs:
