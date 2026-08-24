@@ -25,6 +25,10 @@ class ZebraCrossingRetrieval:
             way["crossing"="zebra"](area.boundaryarea);
             node["highway"="crossing"]["crossing"="zebra"](area.boundaryarea);
             way["highway"="crossing"]["crossing"="zebra"](area.boundaryarea);
+            node[crossing != "zebra"]["crossing:markings" = "zebra"](area.boundaryarea);
+            way[crossing != "zebra"]["crossing:markings" = "zebra"](area.boundaryarea);
+            node[crossing_ref = "zebra"](area.boundaryarea);
+            way[crossing_ref = "zebra"](area.boundaryarea);
             );
             out body;
             >;
@@ -40,6 +44,10 @@ class ZebraCrossingRetrieval:
             way["crossing"="zebra"]({south},{west},{north},{east});
             node["highway"="crossing"]["crossing"="zebra"]({south},{west},{north},{east});
             way["highway"="crossing"]["crossing"="zebra"]({south},{west},{north},{east});
+            node[crossing != "zebra"]["crossing:markings" = "zebra"]({south},{west},{north},{east});
+            way[crossing != "zebra"]["crossing:markings" = "zebra"]({south},{west},{north},{east});
+            node[crossing_ref = "zebra"]({south},{west},{north},{east});
+            way[crossing_ref = "zebra"]({south},{west},{north},{east});
             );
             out body;
             >;
