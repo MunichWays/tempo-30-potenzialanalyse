@@ -29,13 +29,6 @@ class BoundingBoxStorage:
             11.590
         ),
 
-        "custom_mini_landwehr": (
-            48.129,
-            11.546,
-            48.140,
-            11.559
-        ),
-
         "regensburg": (
             48.980,
             12.040,
@@ -55,8 +48,18 @@ class BoundingBoxStorage:
             48.280,
             11.410
         ),
+        "potsdam": (
+            52.343,
+            12.888,
+            52.515,
+            13.166
+        ),
     }
 
     @classmethod
     def get(cls, name: str):
-        return cls.BBOXES.get(name)
+        result = cls.BBOXES.get(name.lower())
+        if result is None:
+            raise ValueError(f"No Bounding Box defined for '{name.lower()}'. Available options: {list(cls.BBOXES.keys())}")
+
+        return result

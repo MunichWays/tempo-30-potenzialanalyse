@@ -1,5 +1,5 @@
 import matplotlib.pyplot as plt
-import time
+import sys
 
 from DataRetrieval.SegmentRetrieval import SegmentRetrieval
 from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
@@ -17,12 +17,20 @@ from DataOutput.GeoJsonCreator import GeoJsonCreator
 from DataOutput.PrintOutput import PrintOutput
 from DataOutput.StreetPlot import StreetPlot
 
-area_under_creation = "München"
+if len(sys.argv) > 1:
+    area_under_creation = sys.argv[1]
+else:
+    area_under_creation = "München"
 
+print(f"Calculating potential for: {area_under_creation}")
+
+# Select Bounding Box
 if(area_under_creation != "München"):
     used_bbox = BoundingBoxStorage.get(area_under_creation)
 else:
     used_bbox : str = "München" # Special case -> Handled differently in overpass query
+
+
 
 #######################################
 # Retrieve (and print) raw data
