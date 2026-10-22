@@ -1,4 +1,4 @@
-name: Weekly Python GeoJSON Export
+name: Weekly Python GeoJSON Export Potsdam
 
 on:
   schedule:
