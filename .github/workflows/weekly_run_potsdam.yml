@@ -50,6 +50,8 @@ jobs:
           FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH_POSTDAM }}
         run: |
 
+          pwd
+
           RELEASE_PATH="$FTP_BASE_PATH/releases/$DEPLOY_TIME"
 
           echo "Deploying release to:"
