@@ -1,0 +1,27 @@
+name: test pwd
+
+workflow_dispatch:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    
+   steps:
+  - name: Install lftp 
+    run: | 
+      sudo apt-get update 
+      sudo apt-get install -y lftp
+  - name: Check FTP directory
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+      FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+    run: |
+      lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF'
+      set ssl:verify-certificate no
+      pwd
+      cls -la /
+      cls -la /folder
+      cls -la /folder/subfolder
+      bye
+      EOF
