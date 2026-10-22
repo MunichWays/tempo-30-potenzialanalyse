@@ -47,11 +47,8 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH_POSTDAM }}
+          FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH_POTSDAM }}
         run: |
-
-          pwd
-
           RELEASE_PATH="$FTP_BASE_PATH/releases/$DEPLOY_TIME"
 
           echo "Deploying release to:"
@@ -80,7 +77,7 @@ jobs:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
           FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
-          FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH_POSTDAM }}
+          FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH_POTSDAM }}
         run: |
       
           RELEASE_PATH="$FTP_BASE_PATH/releases/$DEPLOY_TIME"
