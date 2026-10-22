@@ -1,6 +1,7 @@
 name: test pwd
 
-workflow_dispatch:
+on:
+  workflow_dispatch:
 
 jobs:
   run-script:
