@@ -25,10 +25,13 @@ jobs:
         lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF'
         set ssl:verify-certificate no
         pwd
-        cls -1a $FTP_BASE_PATH
+        cls -1 $FTP_BASE_PATH/
         pwd
 
-        cls -1a $FTP_BASE_PATH_MUC
+        cls -1 $FTP_BASE_PATH_MUC/
+        pwd
+
+        cls -l /
         pwd
 
         bye
