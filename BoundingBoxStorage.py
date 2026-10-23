@@ -54,6 +54,12 @@ class BoundingBoxStorage:
             52.515,
             13.166
         ),
+        "berlin": (
+            52.338,
+            13.088,
+            52.675,
+            13.761
+        ),
     }
 
     @classmethod
