@@ -28,7 +28,7 @@ jobs:
 
         cls -la .
 
-        cls -la $FTP_BASE_PATH
+        cls -1a $FTP_BASE_PATH
 
         bye
         EOF
