@@ -20,15 +20,16 @@ jobs:
         FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
         FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
         FTP_BASE_PATH: ${{ secrets.FTP_BASE_PATH_POTSDAM}}
+        FTP_BASE_PATH_MUC: ${{ secrets.FTP_BASE_PATH}}
       run: |
         lftp -u "$FTP_USERNAME","$FTP_PASSWORD" "$FTP_SERVER" <<'EOF'
         set ssl:verify-certificate no
         pwd
-        cls -la /
-
-        cls -la .
-
         cls -1a $FTP_BASE_PATH
+        pwd
+
+        cls -1a $FTP_BASE_PATH_MUC
+        pwd
 
         bye
         EOF
