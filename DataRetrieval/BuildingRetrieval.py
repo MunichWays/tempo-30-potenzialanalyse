@@ -72,16 +72,16 @@ class BuildingRetrieval:
             out skel qt;
             """
         elif region_definition.key == "münchen": # Only used for munich, will be removed later
-            return """
+            return f"""
             [out:json][timeout:{self.timeout}];
             (
-            area[admin_level=6]["name"="{name}"]->.boundaryarea;
+            area[admin_level=6]["name"="München"]->.boundaryarea;
             {build_blocks("(area.boundaryarea)")}
             );
             out tags body;
             >;
             out skel qt;
-            """.format(name = "München")
+            """
 
     # ------------------------------------------------------------------
     # Fetching
