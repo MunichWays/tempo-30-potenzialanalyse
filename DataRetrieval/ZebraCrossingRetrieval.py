@@ -6,6 +6,8 @@ from typing import Tuple
 import geopandas as gpd
 from shapely.geometry import Point, LineString
 
+from RegionDefinition import RegionDefinition
+
 from DataRetrieval.OSMDataCache import OSMDataCache
 
 class ZebraCrossingRetrieval:
@@ -15,27 +17,12 @@ class ZebraCrossingRetrieval:
         self.timeout = timeout
         self.datacache = OSMDataCache(datatype = "zebra_crossing")
 
-    def _build_query(self, bbox: Tuple[float, float, float, float]) -> str:
-        if(isinstance(bbox, str)):
-            return """
-            [out:json][timeout:{timeout}];
-            (
-            area[admin_level=6]["name"="{name}"]->.boundaryarea;
-            node["crossing"="zebra"](area.boundaryarea);
-            way["crossing"="zebra"](area.boundaryarea);
-
-            node["crossing:markings"="zebra"](area.boundaryarea);
-            way["crossing:markings"="zebra"](area.boundaryarea);
-
-            node["crossing_ref"="zebra"](area.boundaryarea);
-            way["crossing_ref"="zebra"](area.boundaryarea);
-            );
-            out body;
-            >;
-            out skel qt;
-            """.format(timeout=self.timeout, name = bbox)
-        else:
-            south, west, north, east = bbox
+    def _build_query(self, region_definition) -> str:
+        if(region_definition.osm_relation_id is not None):
+            # TODO Add code here
+            pass
+        elif(region_definition.bbox is not None):
+            south, west, north, east = region_definition.bbox
 
             return f"""
             [out:json][timeout:{self.timeout}];
@@ -53,20 +40,39 @@ class ZebraCrossingRetrieval:
             >;
             out skel qt;
             """
+        elif(region_definition.key == "münchen"): # Only used for munich, will be removed later
+            return """
+            [out:json][timeout:{timeout}];
+            (
+            area[admin_level=6]["name"="{name}"]->.boundaryarea;
+            node["crossing"="zebra"](area.boundaryarea);
+            way["crossing"="zebra"](area.boundaryarea);
 
-    def _fetch_raw_cached(self, bbox: Tuple[float, float, float, float]) -> dict:
-        cached_data = self.datacache.load_file_from_cache(bbox)
+            node["crossing:markings"="zebra"](area.boundaryarea);
+            way["crossing:markings"="zebra"](area.boundaryarea);
+
+            node["crossing_ref"="zebra"](area.boundaryarea);
+            way["crossing_ref"="zebra"](area.boundaryarea);
+            );
+            out body;
+            >;
+            out skel qt;
+            """.format(timeout=self.timeout, name = "München")
+      
+
+    def _fetch_raw_cached(self, region_definition) -> dict:
+        cached_data = self.datacache.load_file_from_cache(region_definition)
         if(cached_data is not None):
             print("Using cached data for zebra crossing")
             return cached_data
         else:
             print("Querying OverpassAPI for Zebra Crossings")
             # not cached → query Overpass
-            query = self._build_query(bbox)
+            query = self._build_query(region_definition)
 
             data = self._fetch_raw(query=query)
 
-            self.datacache.store_data(data = data, bbox = bbox)
+            self.datacache.store_data(data = data, region_definition = region_definition)
 
             return data
         
@@ -82,15 +88,16 @@ class ZebraCrossingRetrieval:
                 response.raise_for_status()
                 return response.json()
 
-            except requests.exceptions.RequestException:
-                    wait = min(60, 2 ** attempt)
-                    print(f"Retrying in {wait}s...")
-                    time.sleep(wait)
+            except requests.exceptions.RequestException as exc:
+                print(f"Attempt {attempt + 1} failed: {exc}")
+                wait = min(60, 2 ** attempt)
+                print(f"Retrying in {wait}s...")
+                time.sleep(wait)
 
         raise RuntimeError("Overpass failed")
 
-    def fetch_zebra_crossings(self, bbox: Tuple[float, float, float, float]) -> gpd.GeoDataFrame:
-        data = self._fetch_raw_cached(bbox)
+    def fetch_zebra_crossings(self, region_definition) -> gpd.GeoDataFrame:
+        data = self._fetch_raw_cached(region_definition)
 
         # Nodes sammeln (für Wege)
         nodes = {

@@ -7,6 +7,8 @@ from typing import Tuple, Optional, List, Dict
 
 from shapely.geometry import Point, LineString, Polygon
 
+from RegionDefinition import RegionDefinition
+
 from DataRetrieval.OSMDataCache import OSMDataCache
 
 
@@ -40,7 +42,7 @@ class BuildingRetrieval:
     # ------------------------------------------------------------------
     # Query builder
     # ------------------------------------------------------------------
-    def _build_query(self, bbox: Tuple[float, float, float, float]) -> str:
+    def _build_query(self, region_definition : RegionDefinition) -> str:
         def build_blocks(bbox_str):
             blocks = []
             for key, values in self.tags.items():
@@ -52,19 +54,12 @@ class BuildingRetrieval:
 
             return "\n".join(blocks)
 
-        if isinstance(bbox, str):
-            return f"""
-            [out:json][timeout:{self.timeout}];
-            (
-            area[admin_level=6]["name"="{bbox}"]->.boundaryarea;
-            {build_blocks("(area.boundaryarea)")}
-            );
-            out tags body;
-            >;
-            out skel qt;
-            """
-        else:
-            south, west, north, east = bbox
+
+        if region_definition.osm_relation_id is not None:
+            # TODO: Deine code for this
+            pass
+        elif region_definition.bbox is not None:
+            south, west, north, east = region_definition.bbox
             bbox_str = f"({south},{west},{north},{east})"
 
             return f"""
@@ -76,22 +71,33 @@ class BuildingRetrieval:
             >;
             out skel qt;
             """
+        elif region_definition.key == "münchen": # Only used for munich, will be removed later
+            return """
+            [out:json][timeout:{self.timeout}];
+            (
+            area[admin_level=6]["name"="{name}"]->.boundaryarea;
+            {build_blocks("(area.boundaryarea)")}
+            );
+            out tags body;
+            >;
+            out skel qt;
+            """.format(name = "München")
 
     # ------------------------------------------------------------------
     # Fetching
     # ------------------------------------------------------------------
-    def _fetch_raw_cached(self, bbox):
-        cached = self.datacache.load_file_from_cache(bbox)
+    def _fetch_raw_cached(self, region_definition):
+        cached = self.datacache.load_file_from_cache(region_definition)
 
         if cached is not None:
             print(f"Using cached data for {self.datacache.datatype}")
             return cached
         else:
             print(f"Querying Overpass API for {self.datacache.datatype}...")
-            query = self._build_query(bbox)
+            query = self._build_query(region_definition)
 
             data = self._fetch_raw(query=query)
-            self.datacache.store_data(data=data, bbox=bbox)
+            self.datacache.store_data(data=data, region_definition=region_definition)
 
             return data
         
@@ -114,7 +120,8 @@ class BuildingRetrieval:
 
                 return response.json()
 
-            except requests.exceptions.RequestException:
+            except requests.exceptions.RequestException as exc:
+                print(f"Attempt {attempt + 1} failed: {exc}")
                 wait = min(60, 2 ** attempt)
                 print(f"Retrying in {wait}s...")
                 time.sleep(wait)
@@ -124,8 +131,8 @@ class BuildingRetrieval:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
-    def fetch(self, bbox) -> Optional[gpd.GeoDataFrame]:
-        data = self._fetch_raw_cached(bbox)
+    def fetch(self, region_definition) -> Optional[gpd.GeoDataFrame]:
+        data = self._fetch_raw_cached(region_definition)
 
         nodes = {
             el["id"]: (el["lon"], el["lat"])

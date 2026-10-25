@@ -2,7 +2,7 @@
 from DataRetrieval.BuildingRetrieval import BuildingRetrieval
 
 class SpecificBuildingRetrieval:
-    def retrieve_building_data(bbox, building_configs):
+    def retrieve_building_data(region_definition, building_configs):
 
 
         # Store results here
@@ -16,7 +16,7 @@ class SpecificBuildingRetrieval:
                 name_filter_regex=config.get("regex", None)
             )
             
-            gdf = retrieval.fetch(bbox)
+            gdf = retrieval.fetch(region_definition)
 
             if gdf is not None:
                 building_data[datatype] = gdf
