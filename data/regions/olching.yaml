@@ -1,0 +1,10 @@
+display_name: Olching
+
+bbox:
+  - 48.140
+  - 11.250
+  - 48.280
+  - 11.410
+
+# Optional, nach Prüfung der passenden OSM-Relation:
+# osm_relation_id: 123456

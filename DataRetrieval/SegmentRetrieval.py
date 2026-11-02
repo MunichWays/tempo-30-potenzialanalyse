@@ -5,6 +5,7 @@ from shapely.geometry import LineString
 import time
 
 from pathlib import Path
+from RegionDefinition import RegionDefinition
 
 from dataclasses import dataclass
 from typing import List, Optional
@@ -20,23 +21,15 @@ class SegmentRetrieval:
 
     def _build_query(
         self,
-        bbox: Tuple[float, float, float, float] | str
+        region_definition : RegionDefinition,
     ) -> str:
-        if(isinstance(bbox, str)):
-            return """
-            [out:json][timeout:{timeout}];
-            (
-            area[admin_level=6]["name"="{name}"]->.boundaryarea;
-            way(area.boundaryarea)["highway"];
-            );
-            out body;
-            >;
-            out skel qt;
-            """.format(timeout=self.timeout, name = bbox)
-        else:
-            south, west, north, east = bbox
+        if (region_definition.osm_relation_id is not None):
+            # TODO: Add code that uses relation id for fetching
+            pass 
+        
+        elif(region_definition.bbox is not None):
+            south, west, north, east = region_definition.bbox
 
-            
             return f"""
             [out:json][timeout:{self.timeout}];
             (
@@ -47,6 +40,19 @@ class SegmentRetrieval:
             >;
             out skel qt;
             """
+
+        elif(region_definition.key == "münchen"): # Only used for munich! will be removed later
+            return """
+            [out:json][timeout:{timeout}];
+            (
+            area[admin_level=6]["name"="{name}"]->.boundaryarea;
+            way(area.boundaryarea)["highway"];
+            );
+            out body;
+            >;
+            out skel qt;
+            """.format(timeout=self.timeout, name = "München")
+            print("Cannot use region definition for etching", region_definition)
 
     def _fetch_raw(self, query: str) -> dict:
         for attempt in range(6):
@@ -66,7 +72,8 @@ class SegmentRetrieval:
                 response.raise_for_status()
                 return response.json()
             
-            except requests.exceptions.RequestException:
+            except requests.exceptions.RequestException as exc:
+                print(f"Attempt {attempt + 1} failed: {exc}")
                 wait = min(60, 2 ** attempt)
                 print(f"Retrying in {wait}s...")
                 time.sleep(wait)
@@ -74,8 +81,8 @@ class SegmentRetrieval:
         raise RuntimeError("Overpass failed")
 
 
-    def _fetch_raw_cached(self, bbox: Tuple[float, float, float, float]) -> dict:
-        cached_data = self.datacache.load_file_from_cache(bbox)
+    def _fetch_raw_cached(self, region_definition : RegionDefinition) -> dict:
+        cached_data = self.datacache.load_file_from_cache(region_definition)
 
         if(cached_data is not None):
             print("Using cached data for streets")
@@ -83,19 +90,19 @@ class SegmentRetrieval:
         else:
             print("Quering overpass API for streets...")
             # not cached → query Overpass
-            query = self._build_query(bbox)
+            query = self._build_query(region_definition)
             data = self._fetch_raw(query)
 
-            self.datacache.store_data(data = data, bbox = bbox)
+            self.datacache.store_data(data = data, region_definition = region_definition)
 
             return data
 
     def fetch_as_geodataframe(
         self,
-        bbox: Tuple[float, float, float, float],
+        region_definition: RegionDefinition,
         crs: str = "EPSG:4326"
     ) -> gpd.GeoDataFrame:
-        data = self._fetch_raw_cached(bbox)
+        data = self._fetch_raw_cached(region_definition)
 
         # Nodes sammeln
         nodes = {

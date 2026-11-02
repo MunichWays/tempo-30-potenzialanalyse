@@ -1,0 +1,9 @@
+display_name: Potsdam
+
+bbox:
+  - 52.343  # south
+  - 12.888  # west
+  - 52.515  # north
+  - 13.166  # east
+# Optional, nach Prüfung der passenden OSM-Relation:
+# osm_relation_id: 123456
