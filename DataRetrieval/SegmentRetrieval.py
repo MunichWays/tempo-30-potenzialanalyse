@@ -12,6 +12,8 @@ from typing import List, Optional
 
 from DataRetrieval.OSMDataCache import OSMDataCache
 
+from DataRetrieval.OverpassQueryCreation import OverpassQueryCreation
+
 class SegmentRetrieval:
     OVERPASS_URL = "https://overpass-api.de/api/interpreter"
 
@@ -19,40 +21,16 @@ class SegmentRetrieval:
         self.timeout = timeout
         self.datacache = OSMDataCache(datatype = "streets")
 
-    def _build_query(
-        self,
-        region_definition : RegionDefinition,
-    ) -> str:
-        if (region_definition.osm_relation_id is not None):
-            # TODO: Add code that uses relation id for fetching
-            pass 
-        
-        elif(region_definition.bbox is not None):
-            south, west, north, east = region_definition.bbox
+    def _build_query(self, region_definition: RegionDefinition) -> str:
+        filters = """
+        way["highway"]{region};
+        """
 
-            return f"""
-            [out:json][timeout:{self.timeout}];
-            (
-            way["highway"]
-            ({south},{west},{north},{east});
-            );
-            out body;
-            >;
-            out skel qt;
-            """
-
-        elif(region_definition.key == "münchen"): # Only used for munich! will be removed later
-            return """
-            [out:json][timeout:{timeout}];
-            (
-            area[admin_level=6]["name"="{name}"]->.boundaryarea;
-            way(area.boundaryarea)["highway"];
-            );
-            out body;
-            >;
-            out skel qt;
-            """.format(timeout=self.timeout, name = "München")
-            print("Cannot use region definition for etching", region_definition)
+        return OverpassQueryCreation.build_query(
+            self,
+            region_definition,
+            filters,
+        )
 
     def _fetch_raw(self, query: str) -> dict:
         for attempt in range(6):

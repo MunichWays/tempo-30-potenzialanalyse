@@ -1,3 +1,4 @@
+from DataRetrieval.OverpassQueryCreation import OverpassQueryCreation
 import re
 import requests
 import time
@@ -10,6 +11,7 @@ from shapely.geometry import Point, LineString, Polygon
 from RegionDefinition import RegionDefinition
 
 from DataRetrieval.OSMDataCache import OSMDataCache
+from DataRetrieval.OverpassQueryCreation import OverpassQueryCreation
 
 
 class BuildingRetrieval:
@@ -42,46 +44,22 @@ class BuildingRetrieval:
     # ------------------------------------------------------------------
     # Query builder
     # ------------------------------------------------------------------
-    def _build_query(self, region_definition : RegionDefinition) -> str:
-        def build_blocks(bbox_str):
-            blocks = []
-            for key, values in self.tags.items():
-                regex = "|".join(values)
+    def _build_query(self, region_definition: RegionDefinition) -> str:
+        filters = []
 
-                blocks.append(f'node["{key}"~"{regex}"]{bbox_str};')
-                blocks.append(f'way["{key}"~"{regex}"]{bbox_str};')
-                blocks.append(f'relation["{key}"~"{regex}"]{bbox_str};')
+        for key, values in self.tags.items():
+            regex = "|".join(values)
 
-            return "\n".join(blocks)
+            filters.append(f'node["{key}"~"{regex}"]{{region}};')
+            filters.append(f'way["{key}"~"{regex}"]{{region}};')
+            filters.append(f'relation["{key}"~"{regex}"]{{region}};')
 
-
-        if region_definition.osm_relation_id is not None:
-            # TODO: Deine code for this
-            pass
-        elif region_definition.bbox is not None:
-            south, west, north, east = region_definition.bbox
-            bbox_str = f"({south},{west},{north},{east})"
-
-            return f"""
-            [out:json][timeout:{self.timeout}];
-            (
-            {build_blocks(bbox_str)}
-            );
-            out tags body;
-            >;
-            out skel qt;
-            """
-        elif region_definition.key == "münchen": # Only used for munich, will be removed later
-            return f"""
-            [out:json][timeout:{self.timeout}];
-            (
-            area[admin_level=6]["name"="München"]->.boundaryarea;
-            {build_blocks("(area.boundaryarea)")}
-            );
-            out tags body;
-            >;
-            out skel qt;
-            """
+        return OverpassQueryCreation.build_query(
+            self,
+            region_definition,
+            "\n".join(filters),
+            output="out tags body;\n>;\nout skel qt;",
+        )
 
     # ------------------------------------------------------------------
     # Fetching
