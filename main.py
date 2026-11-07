@@ -102,7 +102,7 @@ potential_results : dict[str, PotentialCalculationResult] = {}
 
 # Zebra crossings
 print("Identifying Zebra Crossings ...")
-potential_results["zebra"] = ZebraPotential.find_tempo50_segments_near_zebra(streets_gdf = streets_gdf, zebras_gdf = zebra_gdf, search_distance_m = 15)
+potential_results["zebra"] = ZebraPotential.find_tempo50_segments_near_zebra(streets_gdf = streets_gdf, zebras_gdf = zebra_gdf, search_distance_m = 2)
 
 for key in building_data.keys():
     print(f"Identifiying Street near {key}")

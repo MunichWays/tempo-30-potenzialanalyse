@@ -9,7 +9,7 @@ class ZebraPotential:
     def find_tempo50_segments_near_zebra(
         streets_gdf: gpd.GeoDataFrame,
         zebras_gdf: gpd.GeoDataFrame,
-        search_distance_m: float = 15.0,
+        search_distance_m: float = 2.0,
         metric_crs: str = "EPSG:25832"
     ) -> PotentialCalculationResult:
         """
