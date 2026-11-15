@@ -101,7 +101,7 @@ namen = {
 }
 
 
-def klassifiziere_unfall(row):
+def _klassifiziere_unfall(row):
     # Fehlende und unerwartete Werte erkennen
     werte = row[teilnehmer]
 
@@ -144,7 +144,7 @@ for col in teilnehmer:
 
 
 muenchen["Unfallklasse"] = muenchen.apply(
-    klassifiziere_unfall,
+    _klassifiziere_unfall,
     axis=1
 )
 

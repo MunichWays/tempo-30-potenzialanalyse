@@ -5,7 +5,7 @@ import geopandas as gpd
 
 from shapely.ops import linemerge
 
-def endpoint_key(pt, tol=0.5):
+def _endpoint_key(pt, tol=0.5):
     # snap to grid to make stable keys
     return (round(pt.x / tol), round(pt.y / tol))
 
@@ -21,8 +21,8 @@ class SegmentMerging:
             p_start = Point(geom.coords[0])
             p_end = Point(geom.coords[-1])
 
-            k_start = endpoint_key(p_start, tol)
-            k_end = endpoint_key(p_end, tol)
+            k_start = _endpoint_key(p_start, tol)
+            k_end = _endpoint_key(p_end, tol)
 
             G.add_node(idx)
 

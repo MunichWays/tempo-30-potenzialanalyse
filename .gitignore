@@ -8,3 +8,10 @@ GEOJSON_EXPORT/
 
 # OSM cache folder
 overpass_cache/
+
+# Local Python environment and coverage reports
+.venv/
+.coverage
+htmlcov/
+.vscode/
+.coveragerc

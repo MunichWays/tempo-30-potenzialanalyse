@@ -93,7 +93,7 @@ class StreetPlot:
             gpd.GeoDataFrame(geometry=ends, crs=gdf.crs),
         )
 
-    def plot_debug_points(ax, streets_gdf):
+    def _plot_debug_points(ax, streets_gdf):
            # -------------------------------------------------
         # DEBUG: plot start / end points of street segments
         # -------------------------------------------------
@@ -146,7 +146,7 @@ class StreetPlot:
         # DEBUG: plot start / end points of street segments
         # -------------------------------------------------
         if debug_endpoints:
-            StreetPlot.plot_debug_points(ax, streets_gdf)
+            StreetPlot._plot_debug_points(ax, streets_gdf)
 
         # plot zebra crossings if provided
         if zebra_gdf is not None and len(zebra_gdf) > 0:

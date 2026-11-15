@@ -3,6 +3,7 @@ geopandas
 shapely
 matplotlib
 scikit-learn
+networkx
 pathlib
 tqdm
 PyYAML
