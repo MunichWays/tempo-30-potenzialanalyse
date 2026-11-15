@@ -9,6 +9,7 @@ from shapely.geometry import Point, LineString
 from RegionDefinition import RegionDefinition
 
 from DataRetrieval.OSMDataCache import OSMDataCache
+from DataRetrieval.OverpassQueryCreation import OverpassQueryCreation
 
 class ZebraCrossingRetrieval:
     OVERPASS_URL = "https://overpass-api.de/api/interpreter"
@@ -17,47 +18,26 @@ class ZebraCrossingRetrieval:
         self.timeout = timeout
         self.datacache = OSMDataCache(datatype = "zebra_crossing")
 
-    def _build_query(self, region_definition) -> str:
-        if(region_definition.osm_relation_id is not None):
-            # TODO Add code here
-            pass
-        elif(region_definition.bbox is not None):
-            south, west, north, east = region_definition.bbox
+    def _build_query(self, region_definition: RegionDefinition) -> str:
+        filters = """
+        node["crossing"="zebra"]{region};
+        way["crossing"="zebra"]{region};
 
-            return f"""
-            [out:json][timeout:{self.timeout}];
-            (
-            node["crossing"="zebra"]({south},{west},{north},{east});
-            way["crossing"="zebra"]({south},{west},{north},{east});
-            node["highway"="crossing"]["crossing"="zebra"]({south},{west},{north},{east});
-            way["highway"="crossing"]["crossing"="zebra"]({south},{west},{north},{east});
-            node[crossing != "zebra"]["crossing:markings" = "zebra"]({south},{west},{north},{east});
-            way[crossing != "zebra"]["crossing:markings" = "zebra"]({south},{west},{north},{east});
-            node[crossing_ref = "zebra"]({south},{west},{north},{east});
-            way[crossing_ref = "zebra"]({south},{west},{north},{east});
-            );
-            out body;
-            >;
-            out skel qt;
-            """
-        elif(region_definition.key == "münchen"): # Only used for munich, will be removed later
-            return """
-            [out:json][timeout:{timeout}];
-            (
-            area[admin_level=6]["name"="{name}"]->.boundaryarea;
-            node["crossing"="zebra"](area.boundaryarea);
-            way["crossing"="zebra"](area.boundaryarea);
+        node["highway"="crossing"]["crossing"="zebra"]{region};
+        way["highway"="crossing"]["crossing"="zebra"]{region};
 
-            node["crossing:markings"="zebra"](area.boundaryarea);
-            way["crossing:markings"="zebra"](area.boundaryarea);
+        node["crossing:markings"="zebra"]{region};
+        way["crossing:markings"="zebra"]{region};
 
-            node["crossing_ref"="zebra"](area.boundaryarea);
-            way["crossing_ref"="zebra"](area.boundaryarea);
-            );
-            out body;
-            >;
-            out skel qt;
-            """.format(timeout=self.timeout, name = "München")
+        node["crossing_ref"="zebra"]{region};
+        way["crossing_ref"="zebra"]{region};
+        """
+
+        return OverpassQueryCreation.build_query(
+            self,
+            region_definition,
+            filters,
+        )
       
 
     def _fetch_raw_cached(self, region_definition) -> dict:
