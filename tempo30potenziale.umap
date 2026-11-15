@@ -1,0 +1,595 @@
+{
+  "type": "umap",
+  "geometry": {
+    "type": "Point",
+    "coordinates": [
+      0,
+      0
+    ]
+  },
+  "properties": {
+    "name": "test",
+    "center": [
+      0,
+      0
+    ],
+    "zoom": 2,
+    "description": "Tempo 30 Potenzialanalyse. Die dargestellten Potenziale sind Prüfhinweise, keine bestätigten Anordnungen. Projekt und Hintergrund: [[https://www.munichways.de/tempo-30-potentialkarte-muenchen/|MunichWays]].",
+    "shortCredit": "[[https://github.com/MunichWays/tempo-30-potenzialanalyse|Tempo-30-Potenzialanalyse]]",
+    "longCredit": "Entwicklung: [[https://github.com/SegfaultCreator|Marius (SegfaultCreator)]] und [[https://github.com/carlwitt|Carl Witt (carlwitt)]]. Quellcode und Methodik: [[https://github.com/MunichWays/tempo-30-potenzialanalyse|GitHub]]. Projektinformationen: [[https://www.munichways.de/tempo-30-potentialkarte-muenchen/|MunichWays]]. Geodaten: [[https://www.openstreetmap.org/copyright|OpenStreetMap-Mitwirkende]] (ODbL).",
+    "permissions": {
+      "edit_status": 3,
+      "share_status": 1
+    },
+    "captionBar": true,
+    "popupShape": "Default",
+    "onLoadPanel": "caption",
+    "homeControl": false,
+    "zoomControl": true,
+    "embedControl": true,
+    "scaleControl": false,
+    "scrollWheelZoom": true,
+    "fullscreenControl": true,
+    "tilelayersControl": true,
+    "displayPopupFooter": false,
+    "licence": {
+      "name": "ODbL",
+      "url": "https://opendatacommons.org/licenses/odbl/"
+    },
+    "tilelayer": {
+      "name": "Positron (Carto)",
+      "url_template": "https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png?key=cb1_2ipg_1_a64e4bfb259752dcd3dc012c",
+      "attribution": "&copy; [[http://www.openstreetmap.org/copyright|OpenStreetMap]] contributors, &copy; [[https://carto.com/attributions|CARTO]]",
+      "minZoom": 0,
+      "maxZoom": 17,
+      "tms": false
+    }
+  },
+  "layers": [
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "layers": [
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 0,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "OSM-Geschwindigkeiten",
+            "type": "Default",
+            "color": "#999999",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}\nGeschwindigkeitsklasse: {maxspeed_class}\nBedingte Geschwindigkeit: {conditional_speed}\n{cond_speed_days} {cond_speed_starttime}–{cond_speed_endtime} {cond_speed_special}",
+            "rules": [
+              {
+                "name": "T30-",
+                "condition": "maxspeed_class=T30-",
+                "properties": {
+                  "color": "#1a9850"
+                }
+              },
+              {
+                "name": "T50+",
+                "condition": "maxspeed_class=T50+",
+                "properties": {
+                  "color": "#d7191c"
+                }
+              },
+              {
+                "name": "Conditional-T30",
+                "condition": "maxspeed_class=Conditional-T30",
+                "properties": {
+                  "color": "#4575b4"
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/streets_and_limit.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            }
+          }
+        }
+      ],
+      "rank": 0,
+      "permissions": {
+        "edit_status": 3
+      },
+      "properties": {
+        "name": "Kontextdaten",
+        "group": true,
+        "description": "Aktuelle Geschwindigkeitsbegrenzungen als Kontext für die Potenzialanalyse.",
+        "displayOnLoad": true,
+        "browsable": true,
+        "inCaption": true
+      }
+    },
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "layers": [
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 0,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Zebrastreifen",
+            "type": "Default",
+            "color": "#9e9e9e",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 4,
+            "popupContentTemplate": "{street}",
+            "rules": [
+              {
+                "name": "Ohne berechnetes Potenzial",
+                "condition": "potential_candidate=false",
+                "properties": {
+                  "color": "#9e9e9e",
+                  "opacity": 0.45,
+                  "fillOpacity": 0.15,
+                  "iconOpacity": 0.5
+                }
+              },
+              {
+                "name": "Mit berechnetem Potenzial",
+                "condition": "potential_candidate=true",
+                "properties": {
+                  "color": "#f28e2b",
+                  "weight": 4,
+                  "opacity": 0.85,
+                  "fillOpacity": 0.35,
+                  "iconOpacity": 0.9
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/zebra.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "fill": false,
+            "stroke": true,
+            "iconUrl": "|||"
+          }
+        },
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 1,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Schulen und Kitas",
+            "type": "Default",
+            "color": "#9e9e9e",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}\n{street} {housenumber}\nBetreiber: {operator}\n{website}",
+            "rules": [
+              {
+                "name": "Ohne berechnetes Potenzial",
+                "condition": "potential_candidate=false",
+                "properties": {
+                  "color": "#9e9e9e",
+                  "opacity": 0.45,
+                  "fillOpacity": 0.15,
+                  "iconOpacity": 0.5
+                }
+              },
+              {
+                "name": "Mit berechnetem Potenzial",
+                "condition": "potential_candidate=true",
+                "properties": {
+                  "color": "#4e79a7",
+                  "weight": 4,
+                  "opacity": 0.85,
+                  "fillOpacity": 0.35,
+                  "iconOpacity": 0.9
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/educational_buildings.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "fill": true,
+            "stroke": false,
+            "fillOpacity": 0.15,
+            "iconOpacity": 0.5,
+            "iconClass": "Circle",
+            "circles": {
+              "radius": {
+                "min": 8
+              }
+            }
+          }
+        },
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 2,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Krankenhäuser",
+            "type": "Default",
+            "color": "#9e9e9e",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}\n{street} {housenumber}\nBetreiber: {operator}\n{website}",
+            "rules": [
+              {
+                "name": "Ohne berechnetes Potenzial",
+                "condition": "potential_candidate=false",
+                "properties": {
+                  "color": "#9e9e9e",
+                  "opacity": 0.45,
+                  "fillOpacity": 0.15,
+                  "iconOpacity": 0.5
+                }
+              },
+              {
+                "name": "Mit berechnetem Potenzial",
+                "condition": "potential_candidate=true",
+                "properties": {
+                  "color": "#af7aa1",
+                  "weight": 4,
+                  "opacity": 0.85,
+                  "fillOpacity": 0.35,
+                  "iconOpacity": 0.9
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/hospitals.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "fill": true,
+            "stroke": false,
+            "fillOpacity": 0.15,
+            "iconOpacity": 0.5,
+            "iconClass": "Circle",
+            "circles": {
+              "radius": {
+                "min": 8
+              }
+            }
+          }
+        },
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 3,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Senioren- und Pflegeeinrichtungen",
+            "type": "Default",
+            "color": "#9e9e9e",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}\n{street} {housenumber}\nBetreiber: {operator}\n{website}",
+            "rules": [
+              {
+                "name": "Ohne berechnetes Potenzial",
+                "condition": "potential_candidate=false",
+                "properties": {
+                  "color": "#9e9e9e",
+                  "opacity": 0.45,
+                  "fillOpacity": 0.15,
+                  "iconOpacity": 0.5
+                }
+              },
+              {
+                "name": "Mit berechnetem Potenzial",
+                "condition": "potential_candidate=true",
+                "properties": {
+                  "color": "#af7aa1",
+                  "weight": 4,
+                  "opacity": 0.85,
+                  "fillOpacity": 0.35,
+                  "iconOpacity": 0.9
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/elderly_homes.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "fill": true,
+            "stroke": false,
+            "fillOpacity": 0.15,
+            "iconOpacity": 0.5,
+            "iconClass": "Circle",
+            "circles": {
+              "radius": {
+                "min": 8
+              }
+            }
+          }
+        },
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 4,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Spielplätze",
+            "type": "Default",
+            "color": "#9e9e9e",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}",
+            "rules": [
+              {
+                "name": "Ohne berechnetes Potenzial",
+                "condition": "potential_candidate=false",
+                "properties": {
+                  "color": "#9e9e9e",
+                  "opacity": 0.45,
+                  "fillOpacity": 0.15,
+                  "iconOpacity": 0.5
+                }
+              },
+              {
+                "name": "Mit berechnetem Potenzial",
+                "condition": "potential_candidate=true",
+                "properties": {
+                  "color": "#76b7b2",
+                  "weight": 4,
+                  "opacity": 0.85,
+                  "fillOpacity": 0.35,
+                  "iconOpacity": 0.9
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/playgrounds.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "fill": true,
+            "stroke": false,
+            "fillOpacity": 0.15,
+            "iconOpacity": 0.5,
+            "iconClass": "Circle",
+            "circles": {
+              "radius": {
+                "min": 8
+              }
+            }
+          }
+        },
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 5,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Einrichtungen für Menschen mit Behinderung",
+            "type": "Default",
+            "color": "#9e9e9e",
+            "displayOnLoad": false,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}\n{street} {housenumber}\nBetreiber: {operator}\n{website}",
+            "rules": [
+              {
+                "name": "Ohne berechnetes Potenzial",
+                "condition": "potential_candidate=false",
+                "properties": {
+                  "color": "#9e9e9e",
+                  "opacity": 0.45,
+                  "fillOpacity": 0.15,
+                  "iconOpacity": 0.5
+                }
+              },
+              {
+                "name": "Mit berechnetem Potenzial",
+                "condition": "potential_candidate=true",
+                "properties": {
+                  "color": "#af7aa1",
+                  "weight": 4,
+                  "opacity": 0.85,
+                  "fillOpacity": 0.35,
+                  "iconOpacity": 0.9
+                }
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/disability_facilities.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "fill": true,
+            "stroke": false,
+            "fillOpacity": 0.15,
+            "iconOpacity": 0.5,
+            "iconClass": "Circle",
+            "circles": {
+              "radius": {
+                "min": 8
+              }
+            }
+          }
+        }
+      ],
+      "rank": 1,
+      "permissions": {
+        "edit_status": 3
+      },
+      "properties": {
+        "name": "Tempo 30 Indikatoren",
+        "group": true,
+        "description": "Lokale Gegebenheiten wie Schulen, Kitas und Zebrastreifen, die ein Tempolimit nahelegen. Die berechneten Potenziale sind Prüfhinweise, keine bestätigten Anordnungen.",
+        "displayOnLoad": true,
+        "browsable": true,
+        "inCaption": true
+      }
+    },
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "layers": [
+        {
+          "type": "FeatureCollection",
+          "features": [],
+          "rank": 0,
+          "permissions": {
+            "edit_status": 3
+          },
+          "properties": {
+            "name": "Tempo-30-Potenziale",
+            "type": "Default",
+            "color": "#d7191c",
+            "displayOnLoad": true,
+            "browsable": true,
+            "inCaption": true,
+            "weight": 5,
+            "popupContentTemplate": "# {name}\n{feature_type}\nHöchstgeschwindigkeit: {maxspeed_class} km/h\n[[https://www.openstreetmap.org/way/{osm_id}|OSM-Straßenabschnitt]]",
+            "rules": [
+              {
+                "condition": "feature_type=Potenzial durch Zebrastreifen",
+                "properties": {
+                  "color": "#f28e2b"
+                },
+                "name": "Potenzial durch Zebrastreifen"
+              },
+              {
+                "condition": "feature_type=Potenzial durch Bildungseinrichtung",
+                "properties": {
+                  "color": "#d7191c"
+                },
+                "name": "Potenzial durch Bildungseinrichtung"
+              },
+              {
+                "condition": "feature_type=Potenzial durch Lückenschluss",
+                "properties": {
+                  "color": "#8e44ad"
+                },
+                "name": "Potenzial durch Lückenschluss"
+              },
+              {
+                "condition": "feature_type=Potenzial durch Krankenhaus",
+                "properties": {
+                  "color": "#d7191c"
+                },
+                "name": "Potenzial durch Krankenhaus"
+              },
+              {
+                "condition": "feature_type=Potenzial durch Seniorenwohnheim",
+                "properties": {
+                  "color": "#d7191c"
+                },
+                "name": "Potenzial durch Seniorenwohnheim"
+              },
+              {
+                "condition": "feature_type=Potenzial durch Spielplatz",
+                "properties": {
+                  "color": "#d7191c"
+                },
+                "name": "Potenzial durch Spielplatz"
+              },
+              {
+                "condition": "feature_type=Potenzial durch Behinderteneinrichtung",
+                "properties": {
+                  "color": "#d7191c"
+                },
+                "name": "Potenzial durch Behinderteneinrichtung"
+              },
+              {
+                "condition": "feature_type=Potenzial durch mehrere Faktoren",
+                "properties": {
+                  "color": "#d7191c"
+                },
+                "name": "Potenzial durch mehrere Faktoren"
+              }
+            ],
+            "remoteData": {
+              "url": "https://tempo30-342004455560-us-east-1-an.s3.us-east-1.amazonaws.com/potential_streets.geojson",
+              "format": "geojson",
+              "proxy": true,
+              "dynamic": false,
+              "ttl": "300"
+            },
+            "opacity": 0.85
+          }
+        }
+      ],
+      "rank": 2,
+      "permissions": {
+        "edit_status": 3
+      },
+      "properties": {
+        "name": "Tempo 30 Potenziale",
+        "group": true,
+        "description": "Straßenabschnitte mit Potenzial auf ein Geschwindigkeitsbegrenzung.",
+        "displayOnLoad": true,
+        "browsable": true,
+        "inCaption": true
+      }
+    },
+    {
+      "type": "FeatureCollection",
+      "features": [],
+      "rank": 3,
+      "permissions": {
+        "edit_status": 1
+      },
+      "properties": {
+        "name": "Deine Ergänzungen",
+        "type": "Default",
+        "displayOnLoad": true,
+        "browsable": true,
+        "inCaption": true,
+        "iconClass": "Ball",
+        "description": "Trage Hinweise und Ergänzungen zu den Potenzialen hier ein.",
+        "popupContentTemplate": "# {name}\n{description}"
+      }
+    }
+  ]
+}
