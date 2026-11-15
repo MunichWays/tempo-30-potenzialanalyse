@@ -1,0 +1,20 @@
+[run]
+branch = True
+relative_files = True
+source =
+    .
+    DataRetrieval
+    PotentialCalculation
+    DataOutput
+    UmapIntegration
+omit =
+    tests/*
+    .venv/*
+    main.py
+    crash-statistic-conversion.py
+    RegionDefinition.py
+    PotentialCalculation/PotentialCalculationResult.py
+
+[report]
+fail_under = 90
+show_missing = True

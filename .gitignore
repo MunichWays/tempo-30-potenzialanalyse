@@ -14,4 +14,3 @@ overpass_cache/
 .coverage
 htmlcov/
 .vscode/
-.coveragerc
