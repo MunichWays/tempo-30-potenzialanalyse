@@ -11,7 +11,7 @@ import requests
 from shapely.geometry import Point
 
 from DataRetrieval.BuildingRetrieval import BuildingRetrieval
-from DataRetrieval.SegmentRetrieval import SegmentRetrieval, _create_gdf_entry, _parse_conditional_speed
+from DataRetrieval.SegmentRetrieval import SegmentRetrieval, create_gdf_entry, parse_conditional_speed
 from DataRetrieval.SpecificBuildingRetrieval import SpecificBuildingRetrieval
 from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
 from RegionDefinition import RegionDefinition
@@ -129,29 +129,29 @@ class SegmentRetrievalTests(unittest.TestCase):
         self.assertTrue(all(roads.geometry.geom_type == "LineString"))
 
     def test_entry_classifies_each_permanent_speed_and_bad_conditionals(self):
-        """Unit under test: _create_gdf_entry; classify speed tags and invalid schedules."""
+        """Unit under test: create_gdf_entry; classify speed tags and invalid schedules."""
         expected = {"10": "10", "20": "20", "30": "30", "50": "50", "60": "60"}
         for speed, classification in expected.items():
             with self.subTest(speed=speed):
-                entry = _create_gdf_entry({"id": 7}, "residential", [(0, 0), (1, 0)],
+                entry = create_gdf_entry({"id": 7}, "residential", [(0, 0), (1, 0)],
                                          {"maxspeed": speed})
                 self.assertEqual(entry["maxspeed_class"], classification)
                 self.assertIsNone(entry["conditional_speed"])
-        zone = _create_gdf_entry({"id": 7}, "residential", [(0, 0), (1, 0)],
+        zone = create_gdf_entry({"id": 7}, "residential", [(0, 0), (1, 0)],
                                 {"zone:maxspeed": "30", "maxspeed:conditional": "bad"})
         self.assertEqual(zone["maxspeed_class"], "30_Zone")
         self.assertIsNone(zone["conditional_speed"])
 
     def test_conditional_parser_rejects_invalid_input_and_keeps_special_days(self):
-        """Unit under test: _parse_conditional_speed; parse schedules and reject bad input."""
-        parsed = _parse_conditional_speed("Conditional 30 @ (Mo-Fr 18:00-07:00; Sa, Su, PH)")
+        """Unit under test: parse_conditional_speed; parse schedules and reject bad input."""
+        parsed = parse_conditional_speed("Conditional 30 @ (Mo-Fr 18:00-07:00; Sa, Su, PH)")
         self.assertEqual((parsed.speed, parsed.days, parsed.start_time, parsed.end_time,
                           parsed.special), (30, ["Mo-Fr"], "18:00", "07:00",
                                            ["Sa", "Su", "PH"]))
         with self.assertRaisesRegex(ValueError, "Cannot parse speed string"):
-            _parse_conditional_speed("30")
+            parse_conditional_speed("30")
         with self.assertRaises(ValueError):
-            _parse_conditional_speed("fast @ (Mo-Fr 18:00-07:00)")
+            parse_conditional_speed("fast @ (Mo-Fr 18:00-07:00)")
 
 
 class BuildingRetrievalTests(unittest.TestCase):

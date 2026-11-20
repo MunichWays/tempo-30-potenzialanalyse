@@ -12,7 +12,7 @@ from shapely.geometry import LineString, Point
 from DataRetrieval.OSMDataCache import OSMDataCache
 from RegionDefinition import RegionDefinition
 from RegionStorage import RegionStorage
-from SegmentMerging import SegmentMerging, _endpoint_key
+from SegmentMerging import SegmentMerging, endpoint_key
 
 
 class RegionStorageTests(unittest.TestCase):
@@ -66,9 +66,9 @@ class OSMDataCacheTests(unittest.TestCase):
 
 class SegmentMergingTests(unittest.TestCase):
     def test_endpoint_key_snaps_points_to_the_requested_grid(self):
-        """Unit under test: _endpoint_key; nearby endpoints share a grid key."""
-        self.assertEqual(_endpoint_key(Point(0.1, 0.1)), _endpoint_key(Point(0.2, 0.2)))
-        self.assertNotEqual(_endpoint_key(Point(0.1, 0.1)), _endpoint_key(Point(0.6, 0.1)))
+        """Unit under test: endpoint_key; nearby endpoints share a grid key."""
+        self.assertEqual(endpoint_key(Point(0.1, 0.1)), endpoint_key(Point(0.2, 0.2)))
+        self.assertNotEqual(endpoint_key(Point(0.1, 0.1)), endpoint_key(Point(0.6, 0.1)))
 
     def test_merge_connected_segments_keeps_components_separate(self):
         """Unit under test: SegmentMerging.merge_connected_segments; group touching lines."""

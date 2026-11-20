@@ -24,7 +24,7 @@ class SpeedAnnotationUpdater:
     """
 
     @staticmethod
-    def _get_feature_annotation_for_key(key, building_configs):
+    def get_feature_annotation_for_key(key, building_configs):
         """Find the label for one potential key.
 
         Example input: key="school",
@@ -49,7 +49,7 @@ class SpeedAnnotationUpdater:
 
 
     @staticmethod
-    def _collect_annotations_for_osm_ids(potential_results : Dict[str, PotentialCalculationResult], building_configs):
+    def collect_annotations_for_osm_ids(potential_results : Dict[str, PotentialCalculationResult], building_configs):
         """Collect every reason's label under its selected street IDs.
 
         Example input: potential_results={
@@ -63,7 +63,7 @@ class SpeedAnnotationUpdater:
         """
         osm_id_to_annotations = defaultdict(list)
         for key, potential_result in potential_results.items():
-            annotation = SpeedAnnotationUpdater._get_feature_annotation_for_key(key, building_configs)
+            annotation = SpeedAnnotationUpdater.get_feature_annotation_for_key(key, building_configs)
 
             for osm_id in potential_result.street_ids:
                 osm_id_to_annotations[osm_id].append(annotation)
@@ -86,7 +86,7 @@ class SpeedAnnotationUpdater:
         """
         streets_copy_gdf = streets_gdf.copy()
 
-        annotations = SpeedAnnotationUpdater._collect_annotations_for_osm_ids(potential_results, building_configs)
+        annotations = SpeedAnnotationUpdater.collect_annotations_for_osm_ids(potential_results, building_configs)
 
         final_annotations = dict(map(
             lambda item: (
@@ -102,7 +102,7 @@ class SpeedAnnotationUpdater:
         return streets_copy_gdf
 
     @staticmethod
-    def _annotate_ids_with_feature_type(streets_gdf, osm_ids_to_annotate, new_val):
+    def annotate_ids_with_feature_type(streets_gdf, osm_ids_to_annotate, new_val):
         """Assign one label to selected IDs and return the updated table.
 
         Example input: streets_gdf is a DataFrame with osm_id [7, 8, 9]

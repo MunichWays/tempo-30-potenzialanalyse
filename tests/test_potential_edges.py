@@ -70,43 +70,43 @@ class NearbyPotentialEdgeTests(unittest.TestCase):
 
 class GapHelperTests(unittest.TestCase):
     def test_direct_slow_anchors_require_both_ends(self):
-        """Unit under test: Tempo50GapPotential._check_if_segment_ends_only_touch_tempo_30."""
+        """Unit under test: Tempo50GapPotential.check_if_segment_ends_only_touch_tempo_30."""
         expected = {"gap_single_enclosed": True, "gap_open_left": False,
                     "gap_straight_continuation": False}
         for scenario, value in expected.items():
             with self.subTest(scenario=scenario):
-                roads = Tempo50GapPotential._prepare_gdf(frame(scenario))
+                roads = Tempo50GapPotential.prepare_gdf(frame(scenario))
                 road = roads.loc[roads.osm_id == 2].iloc[0]
                 self.assertEqual(
-                    Tempo50GapPotential._check_if_segment_ends_only_touch_tempo_30(road, roads),
+                    Tempo50GapPotential.check_if_segment_ends_only_touch_tempo_30(road, roads),
                     value)
 
     def test_angles_reject_a_geometry_without_two_points(self):
-        """Unit under test: Tempo50GapPotential._calculate_segment_end_angles."""
+        """Unit under test: Tempo50GapPotential.calculate_segment_end_angles."""
         class OnePointLine:
             coords = [(0, 0)]
 
         with self.assertRaisesRegex(ValueError, "at least two points"):
-            Tempo50GapPotential._calculate_segment_end_angles(OnePointLine())
+            Tempo50GapPotential.calculate_segment_end_angles(OnePointLine())
 
 
 class AnnotationHelperTests(unittest.TestCase):
     def test_unknown_key_keeps_message_and_unknown_label(self):
-        """Unit under test: SpeedAnnotationUpdater._get_feature_annotation_for_key."""
+        """Unit under test: SpeedAnnotationUpdater.get_feature_annotation_for_key."""
         output = StringIO()
         with redirect_stdout(output):
-            result = SpeedAnnotationUpdater._get_feature_annotation_for_key("unknown", {})
+            result = SpeedAnnotationUpdater.get_feature_annotation_for_key("unknown", {})
         self.assertEqual(result, "Unknown")
         self.assertEqual(output.getvalue(), "Unknown potential type unknown\n")
 
     def test_single_label_helper_updates_only_selected_ids(self):
-        """Unit under test: SpeedAnnotationUpdater._annotate_ids_with_feature_type."""
+        """Unit under test: SpeedAnnotationUpdater.annotate_ids_with_feature_type."""
         roads = pd.DataFrame({"osm_id": [1, 2], "feature_type": ["street", "street"]})
         with redirect_stdout(StringIO()):
-            updated = SpeedAnnotationUpdater._annotate_ids_with_feature_type(
+            updated = SpeedAnnotationUpdater.annotate_ids_with_feature_type(
                 roads, [2], "T30_Potenzial_Zebrastreifen")
         self.assertEqual(updated.feature_type.tolist(),
                          ["street", "T30_Potenzial_Zebrastreifen"])
         self.assertEqual(roads.feature_type.tolist(), ["street", "street"])
-        self.assertIs(SpeedAnnotationUpdater._annotate_ids_with_feature_type(
+        self.assertIs(SpeedAnnotationUpdater.annotate_ids_with_feature_type(
             roads, [], "T30_Potenzial_Zebrastreifen"), roads)

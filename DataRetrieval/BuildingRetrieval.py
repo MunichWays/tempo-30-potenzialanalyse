@@ -43,7 +43,7 @@ class BuildingRetrieval:
     # Query builder
     # ------------------------------------------------------------------
     def _build_query(self, region_definition : RegionDefinition) -> str:
-        def _build_blocks(bbox_str):
+        def build_blocks(bbox_str):
             blocks = []
             for key, values in self.tags.items():
                 regex = "|".join(values)
@@ -65,7 +65,7 @@ class BuildingRetrieval:
             return f"""
             [out:json][timeout:{self.timeout}];
             (
-            {_build_blocks(bbox_str)}
+            {build_blocks(bbox_str)}
             );
             out tags body;
             >;
@@ -76,7 +76,7 @@ class BuildingRetrieval:
             [out:json][timeout:{self.timeout}];
             (
             area[admin_level=6]["name"="München"]->.boundaryarea;
-            {_build_blocks("(area.boundaryarea)")}
+            {build_blocks("(area.boundaryarea)")}
             );
             out tags body;
             >;

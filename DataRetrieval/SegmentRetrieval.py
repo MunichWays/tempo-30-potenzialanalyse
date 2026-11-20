@@ -131,7 +131,7 @@ class SegmentRetrieval:
             if len(coords) < 2:
                 continue
             
-            new_entry = _create_gdf_entry(el, highway, coords, tags)
+            new_entry = create_gdf_entry(el, highway, coords, tags)
            
             records.append(new_entry)
 
@@ -141,7 +141,7 @@ class SegmentRetrieval:
         return result_df_sorted
 
 
-def _create_gdf_entry(el, highway, coords, tags):
+def create_gdf_entry(el, highway, coords, tags):
     # -----------------------------
     # Maxspeed-Klassifikation
     # -----------------------------
@@ -166,7 +166,7 @@ def _create_gdf_entry(el, highway, coords, tags):
 
     max_speed_conditional_str = tags.get("maxspeed:conditional")
     try:
-        conditional_speed = _parse_conditional_speed(max_speed_conditional_str)
+        conditional_speed = parse_conditional_speed(max_speed_conditional_str)
     except:
         conditional_speed = None
     
@@ -205,7 +205,7 @@ class ConditionalSpeed:
     end_time: Optional[str] = None
     special: List[str] = None
 
-def _parse_conditional_speed(cond_str: str) -> ConditionalSpeed:
+def parse_conditional_speed(cond_str: str) -> ConditionalSpeed:
     """
     Parse a conditional speed limit string like:
     "Conditional 50 @ (Mo-Fr 18:00-07:00; Sa, Su, PH)"

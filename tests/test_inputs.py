@@ -1,7 +1,7 @@
 """Interpret speed information without inventing missing values."""
 
 import unittest
-from DataRetrieval.SegmentRetrieval import _create_gdf_entry
+from DataRetrieval.SegmentRetrieval import create_gdf_entry
 from tests.fixtures.fixture_data import features
 
 
@@ -11,11 +11,11 @@ class InputTests(unittest.TestCase):
         feature = next(f for f in features("speed_tags", "streets")
                        if f["properties"]["input_case"] == case)
         props = feature["properties"]
-        return _create_gdf_entry({"id": props["osm_id"]}, props["highway"],
+        return create_gdf_entry({"id": props["osm_id"]}, props["highway"],
                                 feature["geometry"]["coordinates"], props["tags"])
 
     def test_unknown_speed_is_not_assumed_to_be_tempo50(self):
-        """Unit under test: DataRetrieval.SegmentRetrieval._create_gdf_entry.
+        """Unit under test: DataRetrieval.SegmentRetrieval.create_gdf_entry.
 
         Missing or invalid speed tags remain unknown; the analysis must not guess."""
         for case in ("missing_speed", "invalid_speed"):
@@ -23,7 +23,7 @@ class InputTests(unittest.TestCase):
                 self.assertEqual(self._entry(case)["maxspeed_class"], "Keine Daten")
 
     def test_conditional_speed_keeps_its_schedule_and_permanent_speed(self):
-        """Unit under test: DataRetrieval.SegmentRetrieval._create_gdf_entry.
+        """Unit under test: DataRetrieval.SegmentRetrieval.create_gdf_entry.
 
         A time-limited restriction supplements the permanent speed instead of replacing it."""
         for case in ("conditional_speed", "conditional_prefix"):
