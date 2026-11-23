@@ -8,8 +8,15 @@ from pathlib import Path
 from DataOutput.PlaygroundConsolidation import PlaygroundConsolidation
 
 class GeoJsonCreator:
-    def create_geojson_layer_files(folder_name, streets_with_potential : gpd.GeoDataFrame, streets_w_limit_gdf, zebra_gdf, building_data):
-        export_dir = Path("./") / "GEOJSON_EXPORT"  / folder_name
+    def create_geojson_layer_files(
+        folder_name,
+        streets_with_potential: gpd.GeoDataFrame,
+        streets_w_limit_gdf,
+        zebra_gdf,
+        building_data,
+        output_root: Path = Path("./GEOJSON_EXPORT")
+    ):
+        export_dir = Path(output_root) / folder_name
         export_dir.mkdir(parents=True, exist_ok=True)
          # --- Streets with potential only
 
@@ -111,5 +118,5 @@ class GeoJsonCreator:
             with open(output_file, "w", encoding="utf-8") as file:
                 json.dump(geojson, file, separators=(",", ":"), ensure_ascii=False)
 
-                print(f"\n✅ GeoJSON successfully written to: {output_file}")
+                print(f"\nGeoJSON successfully written to: {output_file}")
                 print(f"Total features exported: {len(export_data_dict[entry])}")
