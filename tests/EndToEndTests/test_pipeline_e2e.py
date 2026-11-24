@@ -342,14 +342,10 @@ class SinglePotentialTypeTests(PipelineEndToEndTestCase):
     def test_school_next_to_street_with_tempo30_during_school_hours_gives_no_potential(self):
         school_street = self.a_street_with_tempo30_during_school_hours()
         school = self.a_school_next_to(school_street)
-        # The pipeline currently crashes if no street at all has potential,
-        # so another, unrelated street with potential is needed here.
-        zebra_street = self.a_tempo50_street()
-        self.a_zebra_crossing_on(zebra_street)
 
         self.run_pipeline()
 
-        self.assert_potential_streets_are({zebra_street: ZEBRA_POTENTIAL})
+        self.assert_potential_streets_are({})
         self.assert_not_marked_as_source(school)
 
 

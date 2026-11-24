@@ -49,6 +49,10 @@ class SpeedAnnotationUpdater:
     def annotate_gdf_with_potential_type(streets_gdf, potential_results, building_configs):
         streets_copy_gdf = streets_gdf.copy()
 
+        # Create the column up front, so it also exists when no street has potential
+        if "feature_type" not in streets_copy_gdf.columns:
+            streets_copy_gdf["feature_type"] = None
+
         annotations = SpeedAnnotationUpdater.collect_annotations_for_osm_ids(potential_results, building_configs)
 
         final_annotations = SpeedAnnotationUpdater.determine_final_annotation(annotations)
