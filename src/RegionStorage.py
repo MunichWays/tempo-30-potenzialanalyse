@@ -5,7 +5,7 @@ import yaml
 
 from RegionDefinition import RegionDefinition
 
-REGIONS_DIR = Path(__file__).parent / "data" / "regions"
+REGIONS_DIR = Path(__file__).resolve().parent.parent / "data" / "regions"
 
 class RegionStorage:
     @classmethod
