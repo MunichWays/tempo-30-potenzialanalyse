@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 from DataOutput.PlaygroundConsolidation import PlaygroundConsolidation
+from DataRetrieval.CrashDataRetrieval import SOURCE_ATTRIBUTION
 
 class GeoJsonCreator:
     def create_geojson_layer_files(
@@ -14,7 +15,8 @@ class GeoJsonCreator:
         streets_w_limit_gdf,
         zebra_gdf,
         building_data,
-        output_root: Path = Path("./GEOJSON_EXPORT")
+        output_root: Path = Path("./GEOJSON_EXPORT"),
+        crash_data: dict[int, gpd.GeoDataFrame] | None = None
     ):
         export_dir = Path(output_root) / folder_name
         export_dir.mkdir(parents=True, exist_ok=True)
@@ -30,6 +32,15 @@ class GeoJsonCreator:
 
         for key, data in building_data.items():
             export_data_dict[key] = data.copy()
+
+        # One layer per year: keeps the layers small and comparable with the
+        # yearly Unfallatlas files. Coordinates are in the geometry, linear
+        # referencing is not needed for the map.
+        for year, crashes in (crash_data or {}).items():
+            export_data_dict[f"crashes_{year}"] = crashes.drop(
+                columns=["LINREFX", "LINREFY", "XGCSWGS84", "YGCSWGS84"],
+                errors="ignore"
+            )
 
         export_data_dict["potential_streets"]["feature_type"] = \
             export_data_dict["potential_streets"]["feature_type"].map({
@@ -111,6 +122,9 @@ class GeoJsonCreator:
 
             for f in geojson["features"]:
                 f["properties"] = {k: v for k, v in f["properties"].items() if v is not None}
+
+            if entry.startswith("crashes_"):
+                geojson["attribution"] = SOURCE_ATTRIBUTION
 
             filename = entry + ".geojson"
             output_file = export_dir / filename

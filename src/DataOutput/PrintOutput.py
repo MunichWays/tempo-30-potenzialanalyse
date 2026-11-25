@@ -1,4 +1,5 @@
 
+import pandas as pd
 from geopandas import gpd
 
 class PrintOutput:
@@ -28,3 +29,15 @@ class PrintOutput:
         #for index in range(0, len(merged_gdf)):
         #    print(merged_gdf.iloc[index])
         print(merged_gdf_filter_short)
+
+    def print_crash_summary(crashes_per_year):
+        for year, crashes in crashes_per_year.items():
+            print(f"\nCrashes in region {year}: {len(crashes):,}")
+            if crashes.empty:
+                continue
+
+            classes = crashes["Unfallklasse"]
+            print(pd.DataFrame({
+                "Anzahl": classes.value_counts(dropna=False),
+                "Anteil %": (classes.value_counts(normalize=True, dropna=False) * 100).round(2),
+            }).to_string())

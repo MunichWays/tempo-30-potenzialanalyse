@@ -26,6 +26,8 @@ from shapely.geometry import Point, shape
 from DataRetrieval.OSMDataCache import OSMDataCache
 from PotentialCalculationPipeline import BUILDING_CONFIGS, run_potential_calculation
 
+from tests.unfallatlas_mock import UnfallatlasServerMock
+
 from .overpass_mock import OverpassApiMock, OverpassWorld, offset
 
 
@@ -86,6 +88,7 @@ class PipelineEndToEndTestCase(unittest.TestCase):
         self.tmp_dir = Path(tmp.name)
 
         self.world = OverpassWorld(BUILDING_CONFIGS)
+        self.unfallatlas = UnfallatlasServerMock(years=[2023, 2024, 2025])
         self._street_count = 0
         self._add_unrelated_background()
 
@@ -181,7 +184,7 @@ class PipelineEndToEndTestCase(unittest.TestCase):
         os.chdir(self.tmp_dir)  # any accidental cache dir ends up in the temp dir
         self.addCleanup(os.chdir, cwd)
 
-        with patch("requests.post", side_effect=overpass) as post, \
+        with patch("requests.post", side_effect=overpass) as post,              patch("requests.get", side_effect=self.unfallatlas), \
              patch.object(OSMDataCache, "load_file_from_cache", return_value=None) as load_cache, \
              patch.object(OSMDataCache, "store_data") as store_cache, \
              contextlib.redirect_stdout(io.StringIO()), \
@@ -209,10 +212,20 @@ class PipelineEndToEndTestCase(unittest.TestCase):
             path.stem: json.loads(path.read_text(encoding="utf-8"))
             for path in (export_root / REGION_NAME).glob("*.geojson")
         }
+        self.crash_layers = {
+            name: layer for name, layer in self.geojson.items() if name.startswith("crashes_")
+        }
+        # Every selected year (default: the latest three) gets its own layer, even without crashes
         self.assertCountEqual(
-            self.geojson.keys(),
+            self.crash_layers.keys(),
+            [f"crashes_{year}" for year in sorted(self.unfallatlas.crashes)[-3:]],
+        )
+        self.assertCountEqual(
+            self.geojson.keys() - self.crash_layers.keys(),
             ["potential_streets", "streets_and_limit", "zebra", *BUILDING_CONFIGS.keys()],
         )
+        # Unfallatlas zips are cached in the working directory, never next to the sources
+        self.assertTrue(any((self.tmp_dir / "unfallatlas_cache").glob("*.zip")))
 
         # The unrelated background must never be affected by any scenario
         self.assert_not_marked_as_source(*self.background_sources)
@@ -441,3 +454,48 @@ class MultifactorPotentialTests(PipelineEndToEndTestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CrashStatisticTests(PipelineEndToEndTestCase):
+    """Unfallatlas crashes are clipped to the region and exported as their own layer."""
+
+    def test_crashes_inside_region_are_exported_with_class(self):
+        inside = offset(*FIRST_STREET_ORIGIN, east_m=50)
+        outside = (11.50, 48.20)   # east of the Olching bbox
+        self.unfallatlas.add_crash(*inside, 2025, involved=("Rad", "PKW"), category=2)
+        self.unfallatlas.add_crash(*inside, 2023, involved=("Fuss",))
+        self.unfallatlas.add_crash(*outside, 2025)
+
+        self.run_pipeline()
+
+        self.assertEqual(self.crash_layers["crashes_2024"]["features"], [])
+        features = [f for layer in self.crash_layers.values() for f in layer["features"]]
+        self.assertEqual(len(features), 2)
+        for feature in features:
+            lon, lat = feature["geometry"]["coordinates"]
+            self.assertAlmostEqual(lon, inside[0], places=6)
+            self.assertAlmostEqual(lat, inside[1], places=6)
+
+        by_year = {f["properties"]["UJAHR"]: f["properties"] for f in features}
+        self.assertEqual(by_year["2025"]["Unfallklasse"], "Rad-PKW")
+        self.assertEqual(by_year["2025"]["Unfallkategorie"], "Unfall mit Schwerverletzten")
+        self.assertEqual(by_year["2023"]["Unfallklasse"], "Fuss")
+        self.assertNotIn("LINREFX", by_year["2025"])
+        for layer in self.crash_layers.values():
+            self.assertIn("Unfallatlas", layer["attribution"])
+
+    def test_crash_years_outside_selection_are_ignored(self):
+        self.unfallatlas = UnfallatlasServerMock(years=[2021, 2022, 2023, 2024, 2025])
+        spot = offset(*FIRST_STREET_ORIGIN, east_m=50)
+        for year in [2021, 2022, 2023, 2024, 2025]:
+            self.unfallatlas.add_crash(*spot, year)
+
+        self.run_pipeline()
+
+        self.assertCountEqual(
+            self.crash_layers.keys(), ["crashes_2023", "crashes_2024", "crashes_2025"]
+        )
+        for name, layer in self.crash_layers.items():
+            self.assertEqual(
+                [f["properties"]["UJAHR"] for f in layer["features"]], [name.removeprefix("crashes_")]
+            )

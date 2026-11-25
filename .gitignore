@@ -8,3 +8,5 @@ GEOJSON_EXPORT/
 
 # OSM cache folder
 overpass_cache/
+# Unfallatlas download cache
+unfallatlas_cache/
