@@ -19,6 +19,16 @@ class OverpassQueryCreation:
         """
 
 
+    def build_boundary_relation_selector(region_definition: RegionDefinition) -> str:
+        """Overpass statement selecting the boundary relation used as search area."""
+        if region_definition.osm_relation_id is not None:
+            return f"rel({region_definition.osm_relation_id});"
+        elif region_definition.key == "münchen": # Special handling, will be removed later!
+            return 'rel["boundary"="administrative"][admin_level=6]["name"="München"];'
+
+        raise ValueError("RegionDefinition has no boundary relation")
+
+
     def build_region_filter(
         region_definition: RegionDefinition,
     ) -> tuple[str, str]:

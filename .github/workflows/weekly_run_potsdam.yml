@@ -22,6 +22,20 @@ jobs:
         run: |
           pip install -r requirements.txt
 
+      - name: Get cache month
+        id: cache-month
+        run: echo "month=$(date +'%Y-%m')" >> "$GITHUB_OUTPUT"
+
+      # Unfallatlas zips change only once a year; a monthly key stores newly
+      # published years while older months are restored as fallback.
+      - name: Cache Unfallatlas downloads
+        uses: actions/cache@v4
+        with:
+          path: unfallatlas_cache
+          key: unfallatlas-${{ steps.cache-month.outputs.month }}
+          restore-keys: |
+            unfallatlas-
+
       - name: Run src/main.py
         run: |
           python src/main.py Potsdam

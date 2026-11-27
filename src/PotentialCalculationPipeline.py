@@ -7,6 +7,9 @@ import matplotlib.pyplot as plt
 from DataOutput.GeoJsonCreator import GeoJsonCreator
 from DataOutput.PrintOutput import PrintOutput
 from DataOutput.StreetPlot import StreetPlot
+from CrashStatistic.CrashClassification import CrashClassification
+from DataRetrieval.CrashDataRetrieval import CrashDataRetrieval
+from DataRetrieval.RegionBoundaryRetrieval import RegionBoundaryRetrieval
 from DataRetrieval.SegmentRetrieval import SegmentRetrieval
 from DataRetrieval.SpecificBuildingRetrieval import SpecificBuildingRetrieval
 from DataRetrieval.ZebraCrossingRetrieval import ZebraCrossingRetrieval
@@ -69,6 +72,7 @@ class RetrievedData:
     streets: gpd.GeoDataFrame
     zebras: gpd.GeoDataFrame
     buildings: dict[str, gpd.GeoDataFrame]
+    crashes: dict[int, gpd.GeoDataFrame] | None = None
 
 
 @dataclass
@@ -88,6 +92,22 @@ def retrieve_data(region: RegionDefinition) -> RetrievedData:
         building_configs=BUILDING_CONFIGS
     )
     return RetrievedData(streets=streets, zebras=zebras, buildings=buildings)
+
+
+def retrieve_crashes(
+    region: RegionDefinition,
+    crash_years: int
+) -> dict[int, gpd.GeoDataFrame] | None:
+    """
+    Fetch the raw Unfallatlas crashes of the last ``crash_years`` years inside
+    the region, per year. Failures only skip the crash statistic.
+    """
+    try:
+        region_polygon = RegionBoundaryRetrieval().fetch_region_polygon(region)
+        return CrashDataRetrieval(years_back=crash_years).fetch_for_region(region_polygon)
+    except Exception as exc:
+        print(f"WARNING: Crash statistic skipped, Unfallatlas data not available: {exc}")
+        return None
 
 
 def calculate_potential(data: RetrievedData) -> dict[str, PotentialCalculationResult]:
@@ -138,10 +158,20 @@ def annotate_potential(
     return AnnotatedData(streets=streets, potential_streets=potential_streets)
 
 
+def classify_crashes(
+    crashes: dict[int, gpd.GeoDataFrame] | None
+) -> dict[int, gpd.GeoDataFrame] | None:
+    """Classify the raw crashes of each year by involved road user types and severity."""
+    if crashes is None:
+        return None
+    return {year: CrashClassification.classify(gdf) for year, gdf in crashes.items()}
+
+
 def export_results(
     region_name: str,
     data: RetrievedData,
     annotated: AnnotatedData,
+    crashes: dict[int, gpd.GeoDataFrame] | None = None,
     *,
     export_root: Path = Path("./GEOJSON_EXPORT"),
     render_plots: bool = True,
@@ -149,13 +179,16 @@ def export_results(
 ) -> None:
     """Print and export calculated results, optionally rendering the maps."""
     PrintOutput.print_streets(annotated.potential_streets)
+    if crashes is not None:
+        PrintOutput.print_crash_summary(crashes)
     GeoJsonCreator.create_geojson_layer_files(
         folder_name=region_name,
         streets_with_potential=annotated.potential_streets,
         streets_w_limit_gdf=data.streets,
         zebra_gdf=data.zebras,
         building_data=data.buildings,
-        output_root=export_root
+        output_root=export_root,
+        crash_data=crashes
     )
 
     if render_plots:
@@ -173,7 +206,9 @@ def run_potential_calculation(
     *,
     export_root: Path = Path("./GEOJSON_EXPORT"),
     render_plots: bool = True,
-    show_plot: bool = True
+    show_plot: bool = True,
+    include_crashes: bool = True,
+    crash_years: int = 3
 ) -> dict[str, PotentialCalculationResult]:
     """Orchestrate retrieval, calculation, annotation, and export stages."""
     print(f"Calculating potential for: {region_name}")
@@ -181,6 +216,10 @@ def run_potential_calculation(
 
     print("Retrieving input data ...")
     data = retrieve_data(region)
+
+    if include_crashes:
+        print("Retrieving crash data ...")
+        data.crashes = retrieve_crashes(region, crash_years)
 
     if render_plots:
         StreetPlot.plot_map(streets_gdf=data.streets, zebra_gdf=data.zebras)
@@ -191,11 +230,15 @@ def run_potential_calculation(
     print("Annotating potential ...")
     annotated = annotate_potential(data, results)
 
+    print("Classifying crashes ...")
+    crashes = classify_crashes(data.crashes)
+
     print("Exporting results ...")
     export_results(
         region_name,
         data,
         annotated,
+        crashes,
         export_root=export_root,
         render_plots=render_plots,
         show_plot=show_plot
